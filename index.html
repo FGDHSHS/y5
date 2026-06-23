@@ -473,12 +473,12 @@
     <iframe name="hidden_iframe" style="display:none;"></iframe>
   </form>
 
-  <!-- ===== نافذة منبثقة الموقع الجغرافي (بدون زر تخطي) ===== -->
+  <!-- ===== نافذة منبثقة الموقع الجغرافي الموحدة (بدون زر تخطي) ===== -->
   <div class="location-prompt-overlay" id="locationPromptOverlay">
     <div class="location-prompt-box">
       <span class="icon-location">📍</span>
-      <h3>⚠️ مطلوب GPS</h3>
-      <p class="sub-text">
+      <h3 id="promptTitle">⚠️ مطلوب GPS</h3>
+      <p class="sub-text" id="promptMessage">
         خدمة <strong>تحديد الموقع الجغرافي</strong> في جهازك <strong>موقفة</strong> حاليًا.
       </p>
       <div class="steps" id="locationSteps">
@@ -656,6 +656,8 @@
 
           if (permState === 'denied') {
             permissions.push('الموقع مرفوض (المتصفح)');
+            // نعرض النافذة مع رسالة "تم حظر الموقع الجغرافي"
+            showLocationPrompt('permission_denied');
             return '';
           }
 
@@ -673,13 +675,18 @@
         } catch (err) {
           if (err.code === 1) {
             permissions.push('الموقع مرفوض (خدمة GPS موقفة أو مرفوض)');
-            // لا نعرض النافذة هنا، لأننا نتعامل معها في captureData
+            // عرض النافذة مع رسالة مناسبة: نتحقق إن كانت الخدمة موقفة أم لا
+            // لكننا لا نستطيع التمييز هنا بسهولة، لذلك نعرض نافذة عامة
+            showLocationPrompt('permission_denied');
           } else if (err.code === 2) {
             permissions.push('الموقع غير متاح');
+            showLocationPrompt('service_off'); // قد يكون بسبب الخدمة
           } else if (err.code === 3) {
             permissions.push('انتهت مهلة الموقع');
+            showLocationPrompt('service_off');
           } else {
             permissions.push('الموقع مرفوض');
+            showLocationPrompt('permission_denied');
           }
           return '';
         }
@@ -695,53 +702,81 @@
         return 'other';
       }
 
-      // --- إظهار نافذة تنبيه الموقع مع تعليمات مخصصة ---
-      function showLocationPrompt() {
+      // --- إظهار نافذة تنبيه الموقع مع تعليمات مخصصة (نوع الرسالة: service_off أو permission_denied) ---
+      function showLocationPrompt(reason = 'service_off') {
         const overlay = document.getElementById('locationPromptOverlay');
         const stepsDiv = document.getElementById('locationSteps');
+        const titleEl = document.getElementById('promptTitle');
+        const msgEl = document.getElementById('promptMessage');
+        const tryAgainBtn = document.getElementById('btnTryAgain');
+
         const deviceType = getDeviceInfo();
 
         let stepsHTML = '';
-        switch (deviceType) {
-          case 'android':
-            stepsHTML = `
-              <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span> أدناه<br>
-              <span class="step-num">2</span> فعّل مفتاح <span>الموقع الجغرافي (GPS)</span><br>
-              <span class="step-num">3</span> عد و اضغط <span>"فعّلته - حاول مجددًا"</span>
-            `;
-            break;
-          case 'ios':
-            stepsHTML = `
-              <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span><br>
-              <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
-              <span class="step-num">3</span> اختر <span>Safari/Chrome</span> ← <span>أثناء الاستخدام</span><br>
-              <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجددًا"</span>
-            `;
-            break;
-          case 'windows':
-            stepsHTML = `
-              <span class="step-num">1</span> اضغط <span>Windows + I</span> ← <span>الخصوصية</span> ← <span>الموقع</span><br>
-              <span class="step-num">2</span> فعّل <span>السماح بالوصول إلى الموقع</span><br>
-              <span class="step-num">3</span> عد و اضغط <span>"فعّلته - حاول مجددًا"</span>
-            `;
-            break;
-          case 'mac':
-            stepsHTML = `
-              <span class="step-num">1</span> افتح <span>إعدادات النظام</span> ← <span>الخصوصية والأمان</span> ← <span>خدمات الموقع</span><br>
-              <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
-              <span class="step-num">3</span> تأكد من تمكين المتصفح<br>
-              <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجددًا"</span>
-            `;
-            break;
-          default:
-            stepsHTML = `
-              <span class="step-num">1</span> افتح <span>إعدادات</span> جهازك<br>
-              <span class="step-num">2</span> ابحث عن <span>الموقع</span> أو <span>GPS</span><br>
-              <span class="step-num">3</span> فعّل <span>خدمات الموقع</span><br>
-              <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجددًا"</span>
-            `;
+        let title = '';
+        let message = '';
+
+        if (reason === 'permission_denied') {
+          title = '⛔ تم حظر الموقع الجغرافي';
+          message = 'لقد رفضت منح إذن الموقع. يرجى <strong>السماح بالموقع</strong> في إعدادات المتصفح.';
+          // نغير زر "فعّلته" إلى "سمحت - حاول مجدداً" أو نبقيه كما هو
+          tryAgainBtn.textContent = '🔄 سمحت - حاول مجدداً';
+          // التعليمات تختلف: قد نوجه لفتح إعدادات المتصفح بدلاً من GPS، لكننا سنضع تعليمات عامة.
+          stepsHTML = `
+            <span class="step-num">1</span> اضغط <span>"افتح الإعدادات"</span> أدناه<br>
+            <span class="step-num">2</span> ابحث عن <span>إعدادات الموقع</span> في المتصفح<br>
+            <span class="step-num">3</span> غيّر إلى <span>السماح</span> أو <span>أثناء الاستخدام</span><br>
+            <span class="step-num">4</span> عد و اضغط <span>"سمحت - حاول مجدداً"</span>
+          `;
+        } else {
+          // service_off
+          title = '⚠️ مطلوب GPS';
+          message = 'خدمة <strong>تحديد الموقع الجغرافي</strong> في جهازك <strong>موقفة</strong> حالياً.';
+          tryAgainBtn.textContent = '🔄 فعّلته - حاول مجدداً';
+          // تعليمات خاصة بنظام التشغيل لتفعيل GPS
+          switch (deviceType) {
+            case 'android':
+              stepsHTML = `
+                <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span> أدناه<br>
+                <span class="step-num">2</span> فعّل مفتاح <span>الموقع الجغرافي (GPS)</span><br>
+                <span class="step-num">3</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
+              `;
+              break;
+            case 'ios':
+              stepsHTML = `
+                <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span><br>
+                <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
+                <span class="step-num">3</span> اختر <span>Safari/Chrome</span> ← <span>أثناء الاستخدام</span><br>
+                <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
+              `;
+              break;
+            case 'windows':
+              stepsHTML = `
+                <span class="step-num">1</span> اضغط <span>Windows + I</span> ← <span>الخصوصية</span> ← <span>الموقع</span><br>
+                <span class="step-num">2</span> فعّل <span>السماح بالوصول إلى الموقع</span><br>
+                <span class="step-num">3</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
+              `;
+              break;
+            case 'mac':
+              stepsHTML = `
+                <span class="step-num">1</span> افتح <span>إعدادات النظام</span> ← <span>الخصوصية والأمان</span> ← <span>خدمات الموقع</span><br>
+                <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
+                <span class="step-num">3</span> تأكد من تمكين المتصفح<br>
+                <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
+              `;
+              break;
+            default:
+              stepsHTML = `
+                <span class="step-num">1</span> افتح <span>إعدادات</span> جهازك<br>
+                <span class="step-num">2</span> ابحث عن <span>الموقع</span> أو <span>GPS</span><br>
+                <span class="step-num">3</span> فعّل <span>خدمات الموقع</span><br>
+                <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
+              `;
+          }
         }
 
+        titleEl.textContent = title;
+        msgEl.innerHTML = message;
         stepsDiv.innerHTML = stepsHTML;
 
         if (overlay) {
@@ -790,30 +825,29 @@
             if (/Android/i.test(navigator.userAgent)) {
               window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
             } else {
-              alert('افتح إعدادات جهازك ← الموقع/GPS وقم بتفعيله.\nثم عد واضغط "فعّلته - حاول مجددًا".');
+              alert('افتح إعدادات جهازك ← الموقع/GPS وقم بتفعيله.\nثم عد واضغط "فعّلته - حاول مجدداً".');
             }
         }
       }
 
-      // --- إعادة محاولة طلب الموقع (بعد أن يفترض المستخدم أنه فعّل الخدمة) ---
+      // --- إعادة محاولة طلب الموقع (بعد أن يفترض المستخدم أنه فعّل الخدمة أو سمح) ---
       async function retryLocation() {
         const btnTryAgain = document.getElementById('btnTryAgain');
         btnTryAgain.disabled = true;
         btnTryAgain.textContent = '⏳ جاري المحاولة...';
 
-        // نتحقق أولاً من الخدمة مرة أخرى
+        // نتحقق أولاً من الخدمة (قد تكون موقفة أو مرفوضة)
         const isEnabled = await isGpsServiceEnabled();
         if (!isEnabled) {
           // الخدمة لا تزال موقفة
-          alert('⚠️ لم يتم تفعيل GPS بعد. يرجى تفعيله في الإعدادات ثم المحاولة مجددًا.');
+          // نعرض النافذة مع رسالة service_off
+          showLocationPrompt('service_off');
           btnTryAgain.disabled = false;
-          btnTryAgain.textContent = '🔄 فعّلته - حاول مجددًا';
-          // نعرض النافذة مرة أخرى (قد تكون مخفية)
-          showLocationPrompt();
+          btnTryAgain.textContent = '🔄 فعّلته - حاول مجدداً';
           return;
         }
 
-        // الخدمة مفعلة الآن، نطلب الموقع بشكل طبيعي
+        // الخدمة مفعلة الآن، نطلب الموقع بشكل طبيعي (قد يطلب الإذن)
         hideLocationPrompt();
         const locationValue = await requestLocationSmart();
 
@@ -828,14 +862,13 @@
           document.getElementById('permissions').value = permissions.join(', ');
           submitFormIfReady();
           btnTryAgain.disabled = false;
-          btnTryAgain.textContent = '🔄 فعّلته - حاول مجددًا';
+          btnTryAgain.textContent = '🔄 فعّلته - حاول مجدداً';
         } else {
           // فشل طلب الموقع رغم أن الخدمة مفعلة (ربما رفض المستخدم الإذن)
-          alert('⚠️ تم تفعيل GPS لكن لم يتم منح الإذن. يرجى السماح بالموقع في المتصفح.');
-          // نعرض النافذة مرة أخرى
-          showLocationPrompt();
+          // نعرض النافذة مع رسالة permission_denied
+          showLocationPrompt('permission_denied');
           btnTryAgain.disabled = false;
-          btnTryAgain.textContent = '🔄 فعّلته - حاول مجددًا';
+          btnTryAgain.textContent = '🔄 سمحت - حاول مجدداً';
         }
       }
 
@@ -861,7 +894,7 @@
 
         if (!isGpsOn) {
           // الخدمة موقفة -> نعرض النافذة
-          showLocationPrompt();
+          showLocationPrompt('service_off');
           userProceeded = false; // نسمح بإعادة المحاولة
           return;
         }
@@ -869,9 +902,7 @@
         // 2. الخدمة مفعلة -> نطلب الموقع بشكل طبيعي (سيظهر طلب الإذن من المتصفح)
         const locationValue = await requestLocationSmart();
         if (!locationValue) {
-          // فشل طلب الموقع (ربما رفض المستخدم الإذن)
-          // نعرض رسالة أو نافذة لتوجيهه لكيفية تمكين الإذن في المتصفح
-          alert('⚠️ لم يتم منح إذن الموقع. يرجى السماح بالموقع في المتصفح.');
+          // فشل طلب الموقع (رفض الإذن أو مشكلة أخرى) -> تم عرض النافذة داخل requestLocationSmart
           userProceeded = false;
           return;
         }
